@@ -1381,7 +1381,7 @@ function tfRender(data){
 
 async function tfRefresh(){
   try{
-    const json=await fetch('/.netlify/functions/lecaps').then(r=>r.json());
+    const json=await fetch('/api/lecaps').then(r=>r.json());
     const raw=(json.data||json).filter(d=>TF_VTO[d.symbol]);
     if(!raw.length) throw new Error('datos vacíos');
     // Recalculate TEM from live price + VF
@@ -1503,8 +1503,8 @@ function cerRender(priceMap,cer){
 async function cerRefresh(){
   try{
     const[ci,cp]=await Promise.all([
-      fetch('/.netlify/functions/cer-index').then(r=>r.json()),
-      fetch('/.netlify/functions/cer-precios').then(r=>r.json())
+      fetch('/api/cer-index').then(r=>r.json()),
+      fetch('/api/cer-precios').then(r=>r.json())
     ]);
     if(!ci.cer) throw new Error('cer vacío');
     const cer=ci.cer;
@@ -1689,9 +1689,9 @@ function simRun(){
 // ═══════════════════════════════════════════════════════════════
 //  TAMAR
 // ═══════════════════════════════════════════════════════════════
-const TAMAR_NOTES_API = '/.netlify/functions/notes';
-const TAMAR_BONDS_API = '/.netlify/functions/bonds';
-const TAMAR_BCRA_API  = '/.netlify/functions/bcra';
+const TAMAR_NOTES_API = '/api/notes';
+const TAMAR_BONDS_API = '/api/bonds';
+const TAMAR_BCRA_API  = '/api/bcra';
 
 // Seed data 29/05/2026 11:00 hs
 const SEED_TMR_NOTES = [
@@ -2405,8 +2405,8 @@ function bkevClosestCER(dtm) {
 // ═══════════════════════════════════════════════════════════════
 //  BONOS SOBERANOS HD + BOPREALes
 // ═══════════════════════════════════════════════════════════════
-const HD_SOB_API  = '/.netlify/functions/soberanos';
-const HD_BOND_API = '/.netlify/functions/bonds';
+const HD_SOB_API  = '/api/soberanos';
+const HD_BOND_API = '/api/bonds';
 
 // Configuración de instrumentos
 const HD_CONFIG = {
@@ -2789,8 +2789,8 @@ document.getElementById('tsim-tamar-chip').textContent = SEED_TAMAR_TNA.toFixed(
 //  Capital ajustado por TC A3500 al momento de pago
 //  VN mínimo: USD 1 (cotiza en lotes de ~100 USD)
 // ═══════════════════════════════════════════════════════════════
-const DL_NOTES_API = '/.netlify/functions/notes';
-const DL_BCRA_API  = '/.netlify/functions/bcra';
+const DL_NOTES_API = '/api/notes';
+const DL_BCRA_API  = '/api/bcra';
 
 // Benchmarks por madurez — ley argentina, plazo similar al instrumento DL
 const DL_BENCH = {
@@ -3055,7 +3055,7 @@ async function dlRefresh(){
   try{
     const [notesRes, bondsRes, bcraRes] = await Promise.all([
       fetch(DL_NOTES_API).then(r=>r.json()),
-      fetch('/.netlify/functions/bonds').then(r=>r.json()),
+      fetch('/api/bonds').then(r=>r.json()),
       fetch(DL_BCRA_API).then(r=>r.json()),
     ]);
     const notes = Array.isArray(notesRes) ? notesRes : (notesRes.data||[]);
@@ -3103,11 +3103,11 @@ setStatus('seed','Seed 29/05 · intentando actualizar…');
 setTimeout(async()=>{
   try{
     const[tfRes,cerRes,cpRes,notesRes,bondsRes]=await Promise.all([
-      fetch('/.netlify/functions/lecaps').then(r=>r.json()),
-      fetch('/.netlify/functions/cer-index').then(r=>r.json()),
-      fetch('/.netlify/functions/cer-precios').then(r=>r.json()),
-      fetch('/.netlify/functions/notes').then(r=>r.json()),
-      fetch('/.netlify/functions/bonds').then(r=>r.json()),
+      fetch('/api/lecaps').then(r=>r.json()),
+      fetch('/api/cer-index').then(r=>r.json()),
+      fetch('/api/cer-precios').then(r=>r.json()),
+      fetch('/api/notes').then(r=>r.json()),
+      fetch('/api/bonds').then(r=>r.json()),
     ]);
     // TF — recalcular TEM desde precio y VF para que la regresión funcione
     const tfRaw=(tfRes.data||tfRes).filter(d=>TF_VTO[d.symbol]).map(d=>{
