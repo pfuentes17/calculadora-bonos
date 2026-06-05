@@ -3109,8 +3109,17 @@ setTimeout(async()=>{
       fetch('/.netlify/functions/notes').then(r=>r.json()),
       fetch('/.netlify/functions/bonds').then(r=>r.json()),
     ]);
-    // TF
-    const tfRaw=(tfRes.data||tfRes).filter(d=>TF_VTO[d.symbol]).map(d=>({...d,dtm:getDTM(TF_VTO[d.symbol])??0}));
+    // TF — recalcular TEM desde precio y VF para que la regresión funcione
+    const tfRaw=(tfRes.data||tfRes).filter(d=>TF_VTO[d.symbol]).map(d=>{
+      const dtm=getDTM(TF_VTO[d.symbol])??0;
+      const vf=VF_MAP[d.symbol];
+      let tem=d.tem,tna=d.tna,tea=d.tea;
+      if(vf&&dtm>0&&d.price>0){
+        const t=Math.pow(vf/d.price,30/dtm)-1;
+        tem=t*100; tna=(vf/d.price-1)*365/dtm*100; tea=(Math.pow(1+t,365/30)-1)*100;
+      }
+      return{...d,dtm,tem,tna,tea};
+    });
     tfRender(tfRaw);
     // CER
     const pm={};(cpRes.data||cpRes).forEach(d=>pm[d.symbol]={c:d.c,bid:d.px_bid,ask:d.px_ask,pct:d.pct_change});
