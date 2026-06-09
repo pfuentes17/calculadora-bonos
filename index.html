@@ -2643,86 +2643,147 @@ function hdRenderAll(sobData, bpData) {
     </tr>`;
   }).join('');
 
-  // ── Curva de Rendimientos: líneas GD y AL ordenadas por MD ─────
+  // ── Curva de Rendimientos: regresión logarítmica GD y AL ─────
   // Extraer TIR como número (parseFloat maneja '5.46%' → 5.46)
   const toNum = s => parseFloat(s) || null;
 
-  // Curva GD: solo Globales ley NY
-  const gdLine = gd
+  // Puntos base
+  const gdPts = gd
     .map(d=>({x:toNum(d.duration), y:toNum(d.ytm), sym:d.symbol, precio:d.price_usd}))
     .filter(d=>d.x&&d.y).sort((a,b)=>a.x-b.x);
-  // Curva AL: solo Bonares puros (AL*) — línea limpia
-  const alLine = al
+  const alPts = al
     .filter(d=>d.symbol.startsWith('AL'))
     .map(d=>({x:toNum(d.duration), y:toNum(d.ytm), sym:d.symbol, precio:d.price_usd}))
     .filter(d=>d.x&&d.y).sort((a,b)=>a.x-b.x);
-  // Otros ley arg: AO / AN / AE — puntos sin línea
-  const alExtLine = al
+  const alExtPts = al
     .filter(d=>!d.symbol.startsWith('AL'))
     .map(d=>({x:toNum(d.duration), y:toNum(d.ytm), sym:d.symbol, precio:d.price_usd}))
     .filter(d=>d.x&&d.y).sort((a,b)=>a.x-b.x);
-  // Otros: BPD7 (ley NY)
-  const otLine = otros
+  const otPts = otros
     .map(d=>({x:toNum(d.duration), y:toNum(d.ytm), sym:d.symbol, precio:d.price_usd}))
     .filter(d=>d.x&&d.y).sort((a,b)=>a.x-b.x);
 
-  // Range Y para escala limpia
-  const allTIR = [...gdLine,...alLine,...alExtLine,...otLine].map(d=>d.y).filter(Boolean);
+  // Regresión logarítmica: y = a + b·ln(x)
+  function fitLog(pts) {
+    const n = pts.length; if(n < 2) return null;
+    let su=0,sy=0,su2=0,suy=0;
+    for(const p of pts){ const u=Math.log(p.x); su+=u; sy+=p.y; su2+=u*u; suy+=u*p.y; }
+    const b = (n*suy - su*sy) / (n*su2 - su*su);
+    const a = (sy - b*su) / n;
+    return { a, b, fn: x => a + b*Math.log(x) };
+  }
+  // Generar curva suave (80 puntos)
+  function smoothCurve(fit, xMin, xMax) {
+    if(!fit || xMin<=0) return [];
+    return Array.from({length:80}, (_,i) => {
+      const x = xMin + (xMax-xMin)*i/79;
+      return {x, y: fit.fn(x)};
+    });
+  }
+
+  const gdFit  = fitLog(gdPts);
+  const alFit  = fitLog(alPts);
+
+  // Curvas suaves logarítmicas
+  const allDur = [...gdPts,...alPts,...alExtPts].map(d=>d.x);
+  const xMin = Math.max(0.1, Math.min(...allDur) * 0.85);
+  const xMax = Math.max(...allDur) * 1.08;
+  const gdCurve = smoothCurve(gdFit, xMin, xMax);
+  const alCurve = smoothCurve(alFit, xMin, xMax);
+
+  // Enriquecer puntos con desviación vs curva
+  const enrichDev = (pts, fit) => pts.map(p => ({
+    ...p, dev: fit ? +(p.y - fit.fn(p.x)).toFixed(3) : 0
+  }));
+  const gdScatter  = enrichDev(gdPts,  gdFit);
+  const alScatter  = enrichDev(alPts,  alFit);
+  const alExtScatter = alExtPts.map(p => ({...p, dev:null}));
+
+  // Color por desviación: verde=barato (sobre curva), rojo=caro (bajo curva)
+  const devColor = (pts, baseColor) => pts.map(p =>
+    p.dev > 0.25 ? '#22c55e' : p.dev < -0.25 ? '#ef4444' : baseColor
+  );
+
+  // Range Y
+  const allTIR = [...gdPts,...alPts,...alExtPts,...otPts].map(d=>d.y).filter(Boolean);
   const minTIR = Math.max(0, Math.floor(Math.min(...allTIR) - 0.5));
   const maxTIR = Math.ceil(Math.max(...allTIR) + 0.5);
 
   if(hdChart) hdChart.destroy();
   const ctx = document.getElementById('hdChart').getContext('2d');
   hdChart = new Chart(ctx, {
-    type: 'line',
+    type: 'scatter',
     data: { datasets: [
-      // Globales GD — línea amarilla
-      { label:'Globales GD · Ley NY',
-        data: gdLine,
-        borderColor: '#facc15', borderWidth: 2.5,
-        backgroundColor: 'rgba(250,204,21,.85)',
-        pointRadius: 6, pointHoverRadius: 10,
-        fill: false, tension: 0.3, showLine: true },
-      // Bonares AL — línea naranja
-      { label:'Bonares AL · Ley Arg.',
-        data: alLine,
-        borderColor: '#f59e0b', borderWidth: 2.5,
-        backgroundColor: 'rgba(245,158,11,.85)',
-        pointRadius: 6, pointHoverRadius: 10,
-        fill: false, tension: 0.3, showLine: true },
-      // Otros ley arg (AO/AN/AE) — puntos sin línea
+      // ── Curvas logarítmicas (sin puntos, línea suave) ──
+      { label:'Curva GD (log fit)',
+        data: gdCurve, type:'line',
+        borderColor: 'rgba(250,204,21,0.5)', borderWidth: 1.5,
+        borderDash: [5,4],
+        backgroundColor: 'transparent',
+        pointRadius: 0, fill: false, tension: 0, showLine: true,
+        order: 2 },
+      { label:'Curva AL (log fit)',
+        data: alCurve, type:'line',
+        borderColor: 'rgba(245,158,11,0.5)', borderWidth: 1.5,
+        borderDash: [5,4],
+        backgroundColor: 'transparent',
+        pointRadius: 0, fill: false, tension: 0, showLine: true,
+        order: 2 },
+      // ── Scatter: bonos reales, coloreados por desviación ──
+      { label:'GD · Globales (🟢barato 🔴caro)',
+        data: gdScatter,
+        backgroundColor: devColor(gdScatter, '#facc15'),
+        borderColor: devColor(gdScatter, '#facc15'),
+        pointRadius: 7, pointHoverRadius: 11,
+        showLine: false, order: 1 },
+      { label:'AL · Bonares (🟢barato 🔴caro)',
+        data: alScatter,
+        backgroundColor: devColor(alScatter, '#f59e0b'),
+        borderColor: devColor(alScatter, '#f59e0b'),
+        pointRadius: 7, pointHoverRadius: 11,
+        showLine: false, order: 1 },
+      // ── Otros ley arg — triángulos ──
       { label:'Otros Ley Arg. (AO/AN/AE)',
-        data: alExtLine,
-        borderColor: '#fb923c', borderWidth: 1.5,
-        backgroundColor: 'rgba(251,146,60,.75)',
-        pointRadius: 5, pointHoverRadius: 9,
-        fill: false, tension: 0, showLine: false,
-        pointStyle: 'triangle' },
-      // Otros — puntos sin línea
-      { label:'Otros soberanos',
-        data: otLine,
-        borderColor: '#14b8a6', borderWidth: 1.5,
-        backgroundColor: 'rgba(20,184,166,.75)',
+        data: alExtScatter,
+        backgroundColor: 'rgba(251,146,60,.7)',
+        borderColor: '#fb923c',
         pointRadius: 6, pointHoverRadius: 9,
-        fill: false, tension: 0, showLine: false },
+        pointStyle: 'triangle',
+        showLine: false, order: 1 },
+      // ── Otros soberanos ──
+      { label:'Otros soberanos',
+        data: otPts,
+        backgroundColor: 'rgba(20,184,166,.75)',
+        borderColor: '#14b8a6',
+        pointRadius: 6, pointHoverRadius: 9,
+        showLine: false, order: 1 },
     ]},
     options: {
       responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'nearest', intersect: false },
+      interaction: { mode: 'nearest', intersect: true },
       plugins: {
-        legend: { display: true, labels: { color: '#4a6080', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 12, usePointStyle: true }},
+        legend: { display: true, labels: { color: '#4a6080', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 12, usePointStyle: true,
+          filter: item => !item.text.includes('log fit') // ocultar curvas del legend
+        }},
         tooltip: {
           backgroundColor: '#111827', borderColor: '#2d4060', borderWidth: 1,
           titleColor: '#e8f0f8', bodyColor: '#94adc8', padding: 10,
+          filter: item => !!item.raw.sym, // solo tooltips en puntos reales
           callbacks: {
             title(i) { return i[0].raw.sym || ''; },
             label(i) {
               const d = i.raw;
-              return [
+              const lines = [
                 `TIR:     ${d.y.toFixed(2)}%`,
                 `MD:      ${d.x.toFixed(2)} años`,
                 `Precio:  $${Number(d.precio||0).toFixed(2)}`,
               ];
+              if(d.dev != null) {
+                const pb = Math.round(d.dev * 100);
+                const tag = d.dev > 0.25 ? '🟢 BARATO' : d.dev < -0.25 ? '🔴 CARO' : '⚪ en línea';
+                lines.push(`vs curva: ${pb>=0?'+':''}${pb}pb  ${tag}`);
+              }
+              return lines;
             }
           }
         }
@@ -2746,18 +2807,24 @@ function hdRenderAll(sobData, bpData) {
       id: 'hdLabels',
       afterDatasetsDraw(chart) {
         const c = chart.ctx;
+        // ds 2=GD scatter, 3=AL scatter, 4=alExt, 5=otros
+        const SCATTER_DS = [2,3,4,5];
+        const DS_COLOR   = ['#facc15','#f59e0b','#fb923c','#14b8a6'];
         chart.data.datasets.forEach((ds, di) => {
+          if(!SCATTER_DS.includes(di)) return;
+          const col = DS_COLOR[SCATTER_DS.indexOf(di)];
           const meta = chart.getDatasetMeta(di);
           meta.data.forEach((el, i) => {
             const p = ds.data[i]; if (!p?.sym) return;
             const { x, y } = el.getCenterPoint ? el.getCenterPoint() : el;
-            // Alternar etiqueta arriba/abajo para evitar superposición
+            // Color de etiqueta = igual al punto (verde/rojo si tiene desviación)
+            let labelCol = col;
+            if(p.dev != null) labelCol = p.dev > 0.25 ? '#22c55e' : p.dev < -0.25 ? '#ef4444' : col;
             const offset = i % 2 === 0 ? -14 : 14;
-            const align  = i % 2 === 0 ? 'center' : 'center';
             c.save();
             c.font = '600 9px IBM Plex Mono, monospace';
-            c.fillStyle = di===0 ? '#facc15' : di===1 ? '#f59e0b' : di===2 ? '#fb923c' : '#14b8a6';
-            c.textAlign = align;
+            c.fillStyle = labelCol;
+            c.textAlign = 'center';
             c.fillText(p.sym, x, y + offset);
             c.restore();
           });
