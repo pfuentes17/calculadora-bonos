@@ -2652,13 +2652,9 @@ function hdRenderAll(sobData, bpData) {
     .map(d=>({x:toNum(d.duration), y:toNum(d.ytm), sym:d.symbol, precio:d.price_usd}))
     .filter(d=>d.x&&d.y).sort((a,b)=>a.x-b.x);
   const alPts = al
-    .filter(d=>d.symbol.startsWith('AL'))
     .map(d=>({x:toNum(d.duration), y:toNum(d.ytm), sym:d.symbol, precio:d.price_usd}))
     .filter(d=>d.x&&d.y).sort((a,b)=>a.x-b.x);
-  const alExtPts = al
-    .filter(d=>!d.symbol.startsWith('AL'))
-    .map(d=>({x:toNum(d.duration), y:toNum(d.ytm), sym:d.symbol, precio:d.price_usd}))
-    .filter(d=>d.x&&d.y).sort((a,b)=>a.x-b.x);
+  const alExtPts = [];
   const otPts = otros
     .map(d=>({x:toNum(d.duration), y:toNum(d.ytm), sym:d.symbol, precio:d.price_usd}))
     .filter(d=>d.x&&d.y).sort((a,b)=>a.x-b.x);
