@@ -7,11 +7,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#080c12;--s:#0d1420;--s2:#111827;--bdr:#1f2d40;--bdr2:#2d4060;--txt:#c9d8e8;--mu:#4a6080;--dim:#2a3f55;--cy:#06b6d4;--gr:#10b981;--am:#f59e0b;--pk:#ec4899;--pu:#8b5cf6;--rd:#f87171;--or:#fb923c;--te:#14b8a6;}
+:root{--bg:#080c12;--s:#0d1420;--s2:#111827;--bdr:#1f2d40;--bdr2:#2d4060;--txt:#c9d8e8;--mu:#4a6080;--dim:#2a3f55;--accent:#f59e0b;--accent-dim:rgba(245,158,11,.1);--cy:#06b6d4;--up:#22d3a0;--am:#f59e0b;--pk:#ec4899;--pu:#8b5cf6;--rd:#f87171;--or:#fb923c;--te:#14b8a6;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:13px;min-height:100vh;}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(59,130,246,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.02) 1px,transparent 1px);background-size:48px 48px;}
-.page{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:22px 28px 60px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(245,158,11,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.015) 1px,transparent 1px);background-size:48px 48px;}
+/* TOP NAV BAR */
+.top-nav{position:sticky;top:0;z-index:200;background:#0a0e18;border-bottom:3px solid var(--accent);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:50px;}
+.top-nav-left{display:flex;align-items:center;gap:12px;}
+.logo-box{width:30px;height:30px;border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--accent);}
+.nav-brand{font-size:13px;font-weight:300;color:var(--txt);}<br>.nav-brand strong{font-weight:600;}
+.nav-back{font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(255,255,255,.4);text-decoration:none;border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:4px 10px;white-space:nowrap;transition:all .15s;}
+.nav-back:hover{color:var(--txt);border-color:rgba(255,255,255,.3);}
+.page{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:18px 28px 60px;}
 /* TABS */
 .tabs{display:flex;gap:2px;border-bottom:2px solid var(--bdr);margin-bottom:22px;align-items:flex-end;}
 .tab{padding:8px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);cursor:pointer;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;position:relative;bottom:-2px;transition:all .15s;user-select:none;}
@@ -148,6 +155,13 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
 </style>
 </head>
 <body>
+<nav class="top-nav">
+  <div class="top-nav-left">
+    <div class="logo-box">A</div>
+    <div class="nav-brand"><strong>Amberes</strong> · Research</div>
+  </div>
+  <a href="https://amberes-alerts.vercel.app/" class="nav-back">← Inicio</a>
+</nav>
 <div class="page">
 
 <!-- TABS -->
@@ -161,7 +175,6 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
   <div class="tab hd"        id="btn-hd"   onclick="sw('hd')"   style="color:var(--mu)">💵 Soberanos HD</div>
   <div class="tab dl"        id="btn-dl"   onclick="sw('dl')"   style="color:var(--mu)">🔗 Dólar Linked</div>
   <div class="tab-status"><span class="dot seed" id="sdot"></span><span id="stxt">Cargando…</span><span style="color:var(--dim)" id="stime"></span></div>
-  <a href="https://amberes-alerts.vercel.app/" style="margin-left:auto;margin-right:8px;color:rgba(255,255,255,0.5);font-size:11px;text-decoration:none;white-space:nowrap;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">← Inicio</a>
 </div>
 
 <!-- ════ TAB TF ════ -->
