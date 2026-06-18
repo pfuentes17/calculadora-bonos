@@ -36,6 +36,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .tab.active.hd{color:#facc15;background:var(--s);border-color:var(--bdr);border-bottom-color:var(--s);}
 .tab.hd:hover:not(.active){color:#facc15;}
 .tab.active.dl{color:#a3e635;background:var(--s);border-color:var(--bdr);border-bottom-color:var(--s);}
+.mod-nav{display:flex;flex-wrap:wrap;gap:7px;padding:20px 0 8px;border-top:1px solid var(--bdr);margin-top:28px;}
+.mod-nav-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;width:100%;margin-bottom:2px;}
+.mod-pill{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.12);color:var(--mu);cursor:pointer;transition:all .15s;background:transparent;white-space:nowrap;}
+.mod-pill:hover{border-color:rgba(255,255,255,.3);color:var(--txt);background:rgba(255,255,255,.05);}
 .tab.dl:hover:not(.active){color:#a3e635;}
 .tab-status{margin-left:auto;display:flex;align-items:center;gap:8px;padding-bottom:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mu);}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
@@ -266,6 +270,17 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       <div class="cli"><div class="cldash" style="border-color:rgba(163,230,53,.5)"></div>TC slider</div>
     </div>
   </div>
+
+  <div class="mod-nav">
+    <div class="mod-nav-label">Ir a módulo →</div>
+    <div class="mod-pill" style="color:var(--or);border-color:var(--or)33" onclick="sw('cer')">📊 Bonos CER</div>
+    <div class="mod-pill" style="color:var(--pu);border-color:var(--pu)33" onclick="sw('sim')">🔬 Sim. CER</div>
+    <div class="mod-pill" style="color:#f472b6;border-color:#f472b633" onclick="sw('tmr')">⚡ TAMAR</div>
+    <div class="mod-pill" style="color:#a78bfa;border-color:#a78bfa33" onclick="sw('tsim')">📐 Sim. TAMAR</div>
+    <div class="mod-pill" style="color:#34d399;border-color:#34d39933" onclick="sw('bkev')">⚖ Breakeven</div>
+    <div class="mod-pill" style="color:#facc15;border-color:#facc1533" onclick="sw('hd')">💵 Soberanos HD</div>
+    <div class="mod-pill" style="color:#a3e635;border-color:#a3e63533" onclick="sw('dl')">🔗 Dólar Linked</div>
+  </div>
 </div>
 
 <!-- ════ TAB CER ════ -->
@@ -307,6 +322,17 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       <hr class="dv">
       
       <div class="ftr"><div style="display:flex;gap:10px;flex-wrap:wrap"><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--gr);display:inline-block"></span>Barato</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--rd);display:inline-block"></span>Caro</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--or);display:inline-block"></span>ZC · círculo (en curva=gris, barato=verde, caro=rojo)</div><div class="fl"><span style="width:7px;height:7px;border-radius:2px;background:#38bdf8;display:inline-block;transform:rotate(0deg)"></span>CPN · triángulo</div><div class="fl"><span style="width:7px;height:7px;background:#34d399;display:inline-block;transform:rotate(45deg)"></span>Dual CER/TAMAR · rombo</div></div><div class="fnote">rendimientos.co/api/cer-precios · CER: rendimientos.co/api/cer (BCRA T-10) · TXM CER₀: pendiente de datos de licitación</div></div>
+
+  <div class="mod-nav">
+    <div class="mod-nav-label">Ir a módulo →</div>
+    <div class="mod-pill" style="color:var(--cy);border-color:var(--cy)33" onclick="sw('tf')">📈 Tasa Fija</div>
+    <div class="mod-pill" style="color:var(--pu);border-color:var(--pu)33" onclick="sw('sim')">🔬 Sim. CER</div>
+    <div class="mod-pill" style="color:#f472b6;border-color:#f472b633" onclick="sw('tmr')">⚡ TAMAR</div>
+    <div class="mod-pill" style="color:#a78bfa;border-color:#a78bfa33" onclick="sw('tsim')">📐 Sim. TAMAR</div>
+    <div class="mod-pill" style="color:#34d399;border-color:#34d39933" onclick="sw('bkev')">⚖ Breakeven</div>
+    <div class="mod-pill" style="color:#facc15;border-color:#facc1533" onclick="sw('hd')">💵 Soberanos HD</div>
+    <div class="mod-pill" style="color:#a3e635;border-color:#a3e63533" onclick="sw('dl')">🔗 Dólar Linked</div>
+  </div>
 </div>
 
 <!-- ════ TAB SIM ════ -->
@@ -377,6 +403,17 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
         <div class="cf-wrap"><table class="cf-tbl"><thead><tr><th>Fecha</th><th>CER est.</th><th>Capital</th><th>Interés</th><th>Total</th><th>Días</th><th>VP desc.</th></tr></thead><tbody id="sim-cf"></tbody></table></div>
       </div>
     </div>
+  </div>
+
+  <div class="mod-nav">
+    <div class="mod-nav-label">Ir a módulo →</div>
+    <div class="mod-pill" style="color:var(--cy);border-color:var(--cy)33" onclick="sw('tf')">📈 Tasa Fija</div>
+    <div class="mod-pill" style="color:var(--or);border-color:var(--or)33" onclick="sw('cer')">📊 Bonos CER</div>
+    <div class="mod-pill" style="color:#f472b6;border-color:#f472b633" onclick="sw('tmr')">⚡ TAMAR</div>
+    <div class="mod-pill" style="color:#a78bfa;border-color:#a78bfa33" onclick="sw('tsim')">📐 Sim. TAMAR</div>
+    <div class="mod-pill" style="color:#34d399;border-color:#34d39933" onclick="sw('bkev')">⚖ Breakeven</div>
+    <div class="mod-pill" style="color:#facc15;border-color:#facc1533" onclick="sw('hd')">💵 Soberanos HD</div>
+    <div class="mod-pill" style="color:#a3e635;border-color:#a3e63533" onclick="sw('dl')">🔗 Dólar Linked</div>
   </div>
 </div>
 
@@ -462,6 +499,17 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       <div class="fml-tag">Ret.Directo = VT_vto/P−1 · TNA equiv. ≈ TEM×12 · TIR CER = (VT_CER/P)^(365/DTM)−1 · Escenario: gana el índice que crece más rápido</div>
     </div>
     <div class="fnote">Precios: data912.com/live/arg_notes + arg_bonds · TAMAR: api.argentinadatos.com · CER: BCRA · TXM CER₀: actualizar con datos de licitación</div>
+  </div>
+
+  <div class="mod-nav">
+    <div class="mod-nav-label">Ir a módulo →</div>
+    <div class="mod-pill" style="color:var(--cy);border-color:var(--cy)33" onclick="sw('tf')">📈 Tasa Fija</div>
+    <div class="mod-pill" style="color:var(--or);border-color:var(--or)33" onclick="sw('cer')">📊 Bonos CER</div>
+    <div class="mod-pill" style="color:var(--pu);border-color:var(--pu)33" onclick="sw('sim')">🔬 Sim. CER</div>
+    <div class="mod-pill" style="color:#a78bfa;border-color:#a78bfa33" onclick="sw('tsim')">📐 Sim. TAMAR</div>
+    <div class="mod-pill" style="color:#34d399;border-color:#34d39933" onclick="sw('bkev')">⚖ Breakeven</div>
+    <div class="mod-pill" style="color:#facc15;border-color:#facc1533" onclick="sw('hd')">💵 Soberanos HD</div>
+    <div class="mod-pill" style="color:#a3e635;border-color:#a3e63533" onclick="sw('dl')">🔗 Dólar Linked</div>
   </div>
 </div><!-- /tab-tmr -->
 
@@ -579,6 +627,17 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       </div>
     </div>
   </div>
+
+  <div class="mod-nav">
+    <div class="mod-nav-label">Ir a módulo →</div>
+    <div class="mod-pill" style="color:var(--cy);border-color:var(--cy)33" onclick="sw('tf')">📈 Tasa Fija</div>
+    <div class="mod-pill" style="color:var(--or);border-color:var(--or)33" onclick="sw('cer')">📊 Bonos CER</div>
+    <div class="mod-pill" style="color:var(--pu);border-color:var(--pu)33" onclick="sw('sim')">🔬 Sim. CER</div>
+    <div class="mod-pill" style="color:#f472b6;border-color:#f472b633" onclick="sw('tmr')">⚡ TAMAR</div>
+    <div class="mod-pill" style="color:#34d399;border-color:#34d39933" onclick="sw('bkev')">⚖ Breakeven</div>
+    <div class="mod-pill" style="color:#facc15;border-color:#facc1533" onclick="sw('hd')">💵 Soberanos HD</div>
+    <div class="mod-pill" style="color:#a3e635;border-color:#a3e63533" onclick="sw('dl')">🔗 Dólar Linked</div>
+  </div>
 </div><!-- /tab-tsim -->
 
 <!-- ════ TAB BREAKEVEN ════ -->
@@ -691,6 +750,17 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
     </div>
     <div class="fnote">Requiere datos de ambas solapas cargados · Se recalcula con ↻</div>
   </div>
+
+  <div class="mod-nav">
+    <div class="mod-nav-label">Ir a módulo →</div>
+    <div class="mod-pill" style="color:var(--cy);border-color:var(--cy)33" onclick="sw('tf')">📈 Tasa Fija</div>
+    <div class="mod-pill" style="color:var(--or);border-color:var(--or)33" onclick="sw('cer')">📊 Bonos CER</div>
+    <div class="mod-pill" style="color:var(--pu);border-color:var(--pu)33" onclick="sw('sim')">🔬 Sim. CER</div>
+    <div class="mod-pill" style="color:#f472b6;border-color:#f472b633" onclick="sw('tmr')">⚡ TAMAR</div>
+    <div class="mod-pill" style="color:#a78bfa;border-color:#a78bfa33" onclick="sw('tsim')">📐 Sim. TAMAR</div>
+    <div class="mod-pill" style="color:#facc15;border-color:#facc1533" onclick="sw('hd')">💵 Soberanos HD</div>
+    <div class="mod-pill" style="color:#a3e635;border-color:#a3e63533" onclick="sw('dl')">🔗 Dólar Linked</div>
+  </div>
 </div><!-- /tab-bkev -->
 
 <!-- ════ TAB SOBERANOS HD ════ -->
@@ -786,6 +856,17 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       <div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--pu);display:inline-block"></span>BOPREAL</div>
     </div>
     <div class="fnote">Soberanos: rendimientos.co/api/soberanos · BOPREALes: data912.com/live/arg_bonds · Auto-refresh 20 min</div>
+  </div>
+
+  <div class="mod-nav">
+    <div class="mod-nav-label">Ir a módulo →</div>
+    <div class="mod-pill" style="color:var(--cy);border-color:var(--cy)33" onclick="sw('tf')">📈 Tasa Fija</div>
+    <div class="mod-pill" style="color:var(--or);border-color:var(--or)33" onclick="sw('cer')">📊 Bonos CER</div>
+    <div class="mod-pill" style="color:var(--pu);border-color:var(--pu)33" onclick="sw('sim')">🔬 Sim. CER</div>
+    <div class="mod-pill" style="color:#f472b6;border-color:#f472b633" onclick="sw('tmr')">⚡ TAMAR</div>
+    <div class="mod-pill" style="color:#a78bfa;border-color:#a78bfa33" onclick="sw('tsim')">📐 Sim. TAMAR</div>
+    <div class="mod-pill" style="color:#34d399;border-color:#34d39933" onclick="sw('bkev')">⚖ Breakeven</div>
+    <div class="mod-pill" style="color:#a3e635;border-color:#a3e63533" onclick="sw('dl')">🔗 Dólar Linked</div>
   </div>
 </div><!-- /tab-hd -->
 
@@ -887,6 +968,17 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       <div class="fml-tag">Paridad = precio_ARS / (VN×TC) · TIR_USD = (VN/precio_USD)^(365/DTM)−1 · Dev_BK = (1+TIR_bench)/(1+TIR_USD)−1</div>
     </div>
     <div class="fnote">Precios: data912.com/live · TC Oficial: rendimientos.co/api/bcra</div>
+  </div>
+
+  <div class="mod-nav">
+    <div class="mod-nav-label">Ir a módulo →</div>
+    <div class="mod-pill" style="color:var(--cy);border-color:var(--cy)33" onclick="sw('tf')">📈 Tasa Fija</div>
+    <div class="mod-pill" style="color:var(--or);border-color:var(--or)33" onclick="sw('cer')">📊 Bonos CER</div>
+    <div class="mod-pill" style="color:var(--pu);border-color:var(--pu)33" onclick="sw('sim')">🔬 Sim. CER</div>
+    <div class="mod-pill" style="color:#f472b6;border-color:#f472b633" onclick="sw('tmr')">⚡ TAMAR</div>
+    <div class="mod-pill" style="color:#a78bfa;border-color:#a78bfa33" onclick="sw('tsim')">📐 Sim. TAMAR</div>
+    <div class="mod-pill" style="color:#34d399;border-color:#34d39933" onclick="sw('bkev')">⚖ Breakeven</div>
+    <div class="mod-pill" style="color:#facc15;border-color:#facc1533" onclick="sw('hd')">💵 Soberanos HD</div>
   </div>
 </div><!-- /tab-dl -->
 
