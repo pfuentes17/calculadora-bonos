@@ -3301,6 +3301,8 @@ async function hdRefresh(){
 }
 
 
+// TF seed — recalcular dtm al día de hoy para filtrar vencidos
+(()=>{const sf=SEED_TF.map(d=>({...d,dtm:getDTM(TF_VTO[d.symbol])||0}));tfRender(sf);})();
 (()=>{const pm={};SEED_CER_PRECIOS.forEach(d=>pm[d.symbol]={c:d.c,bid:d.bid,ask:d.ask,pct:d.pct});cerRender(pm,SEED_CER_IDX.cer);})();
 document.getElementById('cer-fecha').textContent='BCRA: '+SEED_CER_IDX.fecha;
 document.getElementById('sim-cer-chip').textContent=SEED_CER_IDX.cer.toFixed(4);
@@ -3627,7 +3629,7 @@ hdRenderAll(SEED_HD_SOB, SEED_HD_BP);
 dlRenderAll(SEED_DL_NOTES, SEED_DL_TC);
 // Se dispara con un pequeño delay para asegurar que cerRender ya corrió
 setTimeout(()=>{ try{ bkevRender(); }catch(e){} }, 200);
-setStatus('seed','Seed 29/05 · intentando actualizar…');
+setStatus('seed','Seed 29/05 (precios ref.) · actualizando…');
 
 // 2. Intenta actualizar via proxy en segundo plano
 setTimeout(async()=>{
