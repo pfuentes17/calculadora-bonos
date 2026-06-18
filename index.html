@@ -329,6 +329,13 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
           <option value="TX31">TX31 — vto 30/11/31</option><option value="DICP">DICP — vto 31/12/33 (resid. 80%)</option>
           <option value="PARP">PARP — vto 31/12/38</option>
         </optgroup>
+        <optgroup label="Duales CER/TAMAR · escenario CER">
+          <option value="TXMJ8">TXMJ8 — Dual CER/TAMAR vto 30/06/28</option>
+          <option value="TXMD8">TXMD8 — Dual CER/TAMAR vto 15/12/28</option>
+          <option value="TXMJ9">TXMJ9 — Dual CER/TAMAR vto 29/06/29</option>
+          <option value="TXMD9">TXMD9 — Dual CER/TAMAR vto 14/12/29</option>
+          <option value="TXMJ0">TXMJ0 — Dual CER/TAMAR vto 28/06/30</option>
+        </optgroup>
       </select>
       <div class="sim-pb" id="sim-pb" style="display:none">
         <div class="sim-pi"><div class="pl">Precio</div><div class="pv" id="sim-p">—</div></div>
@@ -420,7 +427,7 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       </tr></thead><tbody id="tmr-bonos"></tbody></table></div>
     </div>
 
-    <!-- DUALES -->
+    <!-- DUALES TAMAR/PISO -->
     <div class="tw">
       <div class="tw-hdr" style="color:var(--pu)">Bonos Duales · max(TAMAR, tasa fija) al vencimiento</div>
       <div class="tbl-wrap"><table><thead><tr>
@@ -429,16 +436,28 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       </tr></thead><tbody id="tmr-duales"></tbody></table></div>
     </div>
 
+    <!-- DUALES CER/TAMAR -->
+    <div class="tw">
+      <div class="tw-hdr" style="color:#34d399">Duales CER/TAMAR · max(CER acum., TAMAR acum.) al vencimiento
+        <span style="font-size:9px;font-weight:400;color:var(--mu);margin-left:10px">Gestión Milei · Serie TXM</span>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr>
+        <th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>Días</th>
+        <th>Ret. si gana TAMAR</th><th>TNA equiv.</th><th>TIR real CER impl.</th><th class="ct">Escenario actual</th><th>Var%</th>
+      </tr></thead><tbody id="tmr-duales-cer"></tbody></table></div>
+    </div>
+
   </div>
 
   <div class="ftr">
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:#f472b6;display:inline-block"></span>LETAMAR</div>
       <div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--am);display:inline-block"></span>Bono TAMAR</div>
-      <div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--pu);display:inline-block"></span>Dual</div>
-      <div class="fml-tag">Ret.Directo = Precio_vto/Precio_hoy−1 · TEM = (Ret+1)^(30/DTM)−1 · Spread = TEM − TAMAR_mensual</div>
+      <div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--pu);display:inline-block"></span>Dual piso fijo</div>
+      <div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block"></span>Dual CER/TAMAR</div>
+      <div class="fml-tag">Ret.Directo = VT_vto/P−1 · TNA equiv. ≈ TEM×12 · TIR CER = (VT_CER/P)^(365/DTM)−1 · Escenario: gana el índice que crece más rápido</div>
     </div>
-    <div class="fnote">Precios: data912.com/live/arg_notes + arg_bonds · TAMAR: api.argentinadatos.com</div>
+    <div class="fnote">Precios: data912.com/live/arg_notes + arg_bonds · TAMAR: api.argentinadatos.com · CER: BCRA · TXM CER₀: actualizar con datos de licitación</div>
   </div>
 </div><!-- /tab-tmr -->
 
@@ -467,6 +486,13 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
           <option value="TTJ26">TTJ26 — Dual vto 30/06/26 (piso TEM 2.19%)</option>
           <option value="TTS26">TTS26 — Dual vto 30/09/26 (piso TEM 2.17%)</option>
           <option value="TTD26">TTD26 — Dual vto 15/12/26 (piso TEM 2.14%)</option>
+        </optgroup>
+        <optgroup label="Duales CER/TAMAR · max(CER acum., TAMAR acum.)">
+          <option value="TXMJ8">TXMJ8 — Dual CER/TAMAR vto 30/06/28</option>
+          <option value="TXMD8">TXMD8 — Dual CER/TAMAR vto 15/12/28</option>
+          <option value="TXMJ9">TXMJ9 — Dual CER/TAMAR vto 29/06/29</option>
+          <option value="TXMD9">TXMD9 — Dual CER/TAMAR vto 14/12/29</option>
+          <option value="TXMJ0">TXMJ0 — Dual CER/TAMAR vto 28/06/30</option>
         </optgroup>
       </select>
       <div class="sim-pb" id="tsim-pb" style="display:none">
@@ -902,6 +928,7 @@ const SEED_CER_PRECIOS=[
   {symbol:'PARP', c:33570, bid:33565, ask:33570, pct:-0.02},
 ];
 const SEED_CER_IDX={cer:771.5368,fecha:'2026-05-16'};
+window._cerIdx = SEED_CER_IDX.cer; // actualizado por cerRefresh()
 
 const CER_INSTR=[
   {sym:'TZX26',tipo:'ZC', cer0:200.388,  vto:'30/06/26',vtoi:'2026-06-30',dur:0.09, resid:100,coupon:0},
@@ -919,6 +946,12 @@ const CER_INSTR=[
   {sym:'TX31', tipo:'CPN',cer0:47.2937,  vto:'30/11/31',vtoi:'2031-11-30',dur:5.51, resid:100,coupon:0.025},
   {sym:'DICP', tipo:'CPN',cer0:1.4552,   vto:'31/12/33',vtoi:'2033-12-31',dur:7.60, resid:80, coupon:0.0583},
   {sym:'PARP', tipo:'CPN',cer0:1.4552,   vto:'31/12/38',vtoi:'2038-12-31',dur:12.59,resid:100,coupon:0.0177},
+  // Duales CER/TAMAR — tipo:'DUAL CER/TAMAR', cer0 pendiente
+  {sym:'TXMJ8',tipo:'DUAL CER/TAMAR',cer0:null,vto:'30/06/28',vtoi:'2028-06-30',dur:2.03,resid:100,coupon:0},
+  {sym:'TXMD8',tipo:'DUAL CER/TAMAR',cer0:null,vto:'15/12/28',vtoi:'2028-12-15',dur:2.53,resid:100,coupon:0},
+  {sym:'TXMJ9',tipo:'DUAL CER/TAMAR',cer0:null,vto:'29/06/29',vtoi:'2029-06-29',dur:3.03,resid:100,coupon:0},
+  {sym:'TXMD9',tipo:'DUAL CER/TAMAR',cer0:null,vto:'14/12/29',vtoi:'2029-12-14',dur:3.53,resid:100,coupon:0},
+  {sym:'TXMJ0',tipo:'DUAL CER/TAMAR',cer0:null,vto:'28/06/30',vtoi:'2030-06-28',dur:4.03,resid:100,coupon:0},
 ];
 
 // ─── HELPERS ────────────────────────────────────────────────────
@@ -1573,7 +1606,9 @@ const SIM_SCHED={
   DICP:[{d:'2026-06-30',a:5,vr:80,cr:0.0583},{d:'2026-12-31',a:5,vr:75,cr:0.0583},{d:'2027-06-30',a:5,vr:70,cr:0.0583},{d:'2027-12-31',a:5,vr:65,cr:0.0583},{d:'2028-06-30',a:5,vr:60,cr:0.0583},{d:'2028-12-31',a:5,vr:55,cr:0.0583},{d:'2029-06-30',a:5,vr:50,cr:0.0583},{d:'2029-12-31',a:5,vr:45,cr:0.0583},{d:'2030-06-30',a:5,vr:40,cr:0.0583},{d:'2030-12-31',a:5,vr:35,cr:0.0583},{d:'2031-06-30',a:5,vr:30,cr:0.0583},{d:'2031-12-31',a:5,vr:25,cr:0.0583},{d:'2032-06-30',a:5,vr:20,cr:0.0583},{d:'2032-12-31',a:5,vr:15,cr:0.0583},{d:'2033-06-30',a:5,vr:10,cr:0.0583},{d:'2033-12-31',a:5,vr:5,cr:0.0583}],
   PARP:[{d:'2026-09-30',a:0,vr:100,cr:0.0177},{d:'2027-03-31',a:0,vr:100,cr:0.0177},{d:'2027-09-30',a:0,vr:100,cr:0.0177},{d:'2028-03-31',a:0,vr:100,cr:0.0177},{d:'2028-09-30',a:0,vr:100,cr:0.0177},{d:'2029-03-31',a:0,vr:100,cr:0.0177},{d:'2029-09-30',a:5,vr:100,cr:0.0177},{d:'2030-03-31',a:5,vr:95,cr:0.0177},{d:'2030-09-30',a:5,vr:90,cr:0.0177},{d:'2031-03-31',a:5,vr:85,cr:0.0177},{d:'2031-09-30',a:5,vr:80,cr:0.0177},{d:'2032-03-31',a:5,vr:75,cr:0.0177},{d:'2032-09-30',a:5,vr:70,cr:0.0177},{d:'2033-03-31',a:5,vr:65,cr:0.0177},{d:'2033-09-30',a:5,vr:60,cr:0.0177},{d:'2034-03-31',a:5,vr:55,cr:0.0177},{d:'2034-09-30',a:5,vr:50,cr:0.0177},{d:'2035-03-31',a:5,vr:45,cr:0.0177},{d:'2035-09-30',a:5,vr:40,cr:0.0177},{d:'2036-03-31',a:5,vr:35,cr:0.0177},{d:'2036-09-30',a:5,vr:30,cr:0.0177},{d:'2037-03-31',a:5,vr:25,cr:0.0177},{d:'2037-09-30',a:5,vr:20,cr:0.0177},{d:'2038-03-31',a:5,vr:15,cr:0.0177},{d:'2038-09-30',a:5,vr:10,cr:0.0177},{d:'2038-12-31',a:5,vr:5,cr:0.0177}],
 };
-const SIM_CER0={TZX26:200.388,X31L6:685.5506,X30S6:714.9849,TZXO6:480.1526,X30N6:661.1807,TZXD6:271.0476,TZXM7:362.5767,TZX27:200.388,TZXD7:271.0476,TZX28:200.388,TX26:22.544,TX28:22.544,TX31:47.2937,DICP:1.4552,PARP:1.4552};
+const SIM_CER0={TZX26:200.388,X31L6:685.5506,X30S6:714.9849,TZXO6:480.1526,X30N6:661.1807,TZXD6:271.0476,TZXM7:362.5767,TZX27:200.388,TZXD7:271.0476,TZX28:200.388,TX26:22.544,TX28:22.544,TX31:47.2937,DICP:1.4552,PARP:1.4552,
+  // TXM CER0 pendiente — completar con datos de prospecto de licitación
+  TXMJ8:null,TXMD8:null,TXMJ9:null,TXMD9:null,TXMJ0:null};
 
 let simBond=null,simIPCMonths=[],simChart=null;
 
@@ -1725,6 +1760,12 @@ const SEED_TMR_BONDS = [
   {symbol:'TTD26', c:158.75,  bid:158.70,  ask:158.75, pct:0.15},
   {symbol:'TTJ26', c:159.65,  bid:159.60,  ask:159.65, pct:0.25},
   {symbol:'TTS26', c:159.15,  bid:159.10,  ask:159.15, pct:0.34},
+  // Duales CER/TAMAR — precios seed estimados (actualizar con datos de mercado)
+  {symbol:'TXMJ8', c:103.0,   bid:102.5,   ask:103.5,  pct:0.0},
+  {symbol:'TXMD8', c:102.0,   bid:101.5,   ask:102.5,  pct:0.0},
+  {symbol:'TXMJ9', c:104.5,   bid:104.0,   ask:105.0,  pct:0.0},
+  {symbol:'TXMD9', c:103.5,   bid:103.0,   ask:104.0,  pct:0.0},
+  {symbol:'TXMJ0', c:106.0,   bid:105.5,   ask:106.5,  pct:0.0},
 ];
 
 // TAMAR oficial BCRA 27/05/2026 — TNA 22.8125%
@@ -1754,10 +1795,16 @@ const TMR_INSTR = {
   TMF27: {tipo:'BONO TAMAR', vtod:'28/02/27', vtoi:'2027-02-28', emision:'2025-02-28', piso_tem:null},
   TMG27: {tipo:'BONO TAMAR', vtod:'31/08/27', vtoi:'2027-08-31', emision:'2025-08-29', piso_tem:null},
   TMG28: {tipo:'BONO TAMAR', vtod:'31/08/28', vtoi:'2028-08-31', emision:'2026-05-28', piso_tem:null},
-  // Duales — emitidos 24/01/2025, piso TEM confirmado por prospecto
-  TTJ26: {tipo:'DUAL', vtod:'30/06/26', vtoi:'2026-06-30', emision:'2025-01-24', piso_tem:2.19/100},
-  TTS26: {tipo:'DUAL', vtod:'30/09/26', vtoi:'2026-09-30', emision:'2025-01-24', piso_tem:2.17/100},
-  TTD26: {tipo:'DUAL', vtod:'15/12/26', vtoi:'2026-12-15', emision:'2025-01-24', piso_tem:2.14/100},
+  // Duales TAMAR/piso — emitidos 24/01/2025, piso TEM confirmado por prospecto
+  TTJ26: {tipo:'DUAL',         vtod:'30/06/26', vtoi:'2026-06-30', emision:'2025-01-24', piso_tem:2.19/100, cer0:null},
+  TTS26: {tipo:'DUAL',         vtod:'30/09/26', vtoi:'2026-09-30', emision:'2025-01-24', piso_tem:2.17/100, cer0:null},
+  TTD26: {tipo:'DUAL',         vtod:'15/12/26', vtoi:'2026-12-15', emision:'2025-01-24', piso_tem:2.14/100, cer0:null},
+  // Duales CER/TAMAR — Gestión Milei · CER₀ pendiente de datos de licitación
+  TXMJ8: {tipo:'DUAL CER/TAMAR', vtod:'30/06/28', vtoi:'2028-06-30', emision:null, piso_tem:null, cer0:null},
+  TXMD8: {tipo:'DUAL CER/TAMAR', vtod:'15/12/28', vtoi:'2028-12-15', emision:null, piso_tem:null, cer0:null},
+  TXMJ9: {tipo:'DUAL CER/TAMAR', vtod:'29/06/29', vtoi:'2029-06-29', emision:null, piso_tem:null, cer0:null},
+  TXMD9: {tipo:'DUAL CER/TAMAR', vtod:'14/12/29', vtoi:'2029-12-14', emision:null, piso_tem:null, cer0:null},
+  TXMJ0: {tipo:'DUAL CER/TAMAR', vtod:'28/06/30', vtoi:'2030-06-28', emision:null, piso_tem:null, cer0:null},
 };
 
 let tmrTamarTEM = SEED_TAMAR_RATE; // TEM mensual TAMAR actual
@@ -1790,6 +1837,50 @@ function tmrRow(d, tamarTEM) {
       <td style="color:#f472b6;font-weight:600">${p2(tamarTEM*100)}</td>
       <td style="color:var(--am)">${p2(tnaEquiv)}</td>
       <td style="color:var(--mu)">≈ 0%</td>
+      <td style="${pchCls}">${d.pct!=null?(d.pct>=0?'+':'')+d.pct.toFixed(2)+'%':'—'}</td>
+    </tr>`;
+  }
+
+  if (instr.tipo === 'DUAL CER/TAMAR') {
+    const precio    = d.c;
+    const pchCls    = d.pct >= 0 ? 'color:var(--gr)' : 'color:var(--rd)';
+    const pCls      = 'color:#94adc8';
+    const today     = new Date(); today.setHours(0,0,0,0);
+    const vtoDate   = new Date(instr.vtoi+'T00:00:00-03:00');
+    const diasRest30360 = days30360(today, vtoDate);
+    if (diasRest30360 <= 0) return '';
+    const mesesRest = diasRest30360 / 30;
+
+    // Escenario TAMAR: precio × (1 + TAMAR_TEM)^meses_rest
+    const vtTamar   = precio * Math.pow(1 + tamarTEM, mesesRest);
+    const retTamar  = vtTamar / precio - 1;
+    const tnaEquiv  = tamarTEM * 12 * 100;
+
+    // Escenario CER: necesita cer0 + CER hoy
+    let tirCer = null, cerGana = null;
+    if (instr.cer0 && window._cerIdx) {
+      const vtCer = 100 * (window._cerIdx / instr.cer0);
+      tirCer = (Math.pow(vtCer / precio, 365 / diasRest30360) - 1) * 100;
+      cerGana = vtCer > vtTamar;
+    }
+
+    const escTag = cerGana === null
+      ? '<span style="color:var(--mu);font-size:9px">necesita CER₀</span>'
+      : cerGana
+        ? '<span style="color:#34d399;font-size:9px;font-weight:700">📈 CER</span>'
+        : '<span style="color:#f472b6;font-size:9px;font-weight:700">⚡ TAMAR</span>';
+
+    return `<tr>
+      <td>${d.symbol}<span style="font-size:8px;margin-left:4px;padding:1px 5px;border-radius:3px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#34d399">CER/TAM</span></td>
+      <td class="ct"><span class="vto">${instr.vtod}</span></td>
+      <td style="${pCls};font-weight:600">${pr(precio)}</td>
+      <td style="color:var(--mu)">${pr(d.bid)}</td>
+      <td style="color:var(--mu)">${pr(d.ask)}</td>
+      <td style="color:var(--mu)">${diasRest30360}d</td>
+      <td style="color:var(--gr);font-weight:600">${p2(retTamar*100)}</td>
+      <td style="color:var(--am)">${p2(tnaEquiv)}</td>
+      <td style="color:#34d399">${tirCer !== null ? p2(tirCer) : '<span style="color:var(--mu);font-size:9px">—&nbsp;(CER₀ pendiente)</span>'}</td>
+      <td class="ct">${escTag}</td>
       <td style="${pchCls}">${d.pct!=null?(d.pct>=0?'+':'')+d.pct.toFixed(2)+'%':'—'}</td>
     </tr>`;
   }
@@ -1833,16 +1924,24 @@ function tmrRow(d, tamarTEM) {
 
 function tmrRender(notes, bonds, tamarTEM) {
   tmrTamarTEM = tamarTEM;
-  const letamar = notes.filter(d=>TMR_INSTR[d.symbol]?.tipo==='LETAMAR');
-  const bTamar  = bonds.filter(d=>TMR_INSTR[d.symbol]?.tipo==='BONO TAMAR');
-  const duales  = bonds.filter(d=>TMR_INSTR[d.symbol]?.tipo==='DUAL');
+  const letamar   = notes.filter(d=>TMR_INSTR[d.symbol]?.tipo==='LETAMAR');
+  const bTamar    = bonds.filter(d=>TMR_INSTR[d.symbol]?.tipo==='BONO TAMAR');
+  const duales    = bonds.filter(d=>TMR_INSTR[d.symbol]?.tipo==='DUAL');
+  const dualesCT  = bonds.filter(d=>TMR_INSTR[d.symbol]?.tipo==='DUAL CER/TAMAR');
 
-  document.getElementById('tmr-letamar').innerHTML = letamar.map(d=>tmrRow(d,tamarTEM)).join('');
-  document.getElementById('tmr-bonos').innerHTML   = bTamar.map(d=>tmrRow(d,tamarTEM)).join('');
-  document.getElementById('tmr-duales').innerHTML  = duales.map(d=>tmrRow(d,tamarTEM)).join('');
+  document.getElementById('tmr-letamar').innerHTML    = letamar.map(d=>tmrRow(d,tamarTEM)).join('');
+  document.getElementById('tmr-bonos').innerHTML      = bTamar.map(d=>tmrRow(d,tamarTEM)).join('');
+  document.getElementById('tmr-duales').innerHTML     = duales.map(d=>tmrRow(d,tamarTEM)).join('');
+  document.getElementById('tmr-duales-cer').innerHTML = dualesCT.map(d=>tmrRow(d,tamarTEM)).join('');
+
+  // fallback seed para duales CER/TAMAR si la API no los devuelve
+  if (!dualesCT.length) {
+    const seedCT = SEED_TMR_BONDS.filter(d=>TMR_INSTR[d.symbol]?.tipo==='DUAL CER/TAMAR');
+    document.getElementById('tmr-duales-cer').innerHTML = seedCT.map(d=>tmrRow(d,tamarTEM)).join('');
+  }
 
   // KPIs
-  const allInstr = [...letamar,...bTamar,...duales];
+  const allInstr = [...letamar,...bTamar,...duales,...dualesCT];
   document.getElementById('tmr-k4').textContent = allInstr.length;
   const avgPct = allInstr.reduce((s,d)=>s+(d.pct||0),0)/Math.max(allInstr.length,1);
   document.getElementById('tmr-k5').textContent = (avgPct>=0?'+':'')+avgPct.toFixed(2)+'%';
@@ -1930,6 +2029,12 @@ const TSIM_INSTR = {
   TTJ26: {tipo:'DUAL',       vtoi:'2026-06-30', vtod:'30/06/26', emision:'2025-01-24', piso_tem:2.19/100, vn_emision:100},
   TTS26: {tipo:'DUAL',       vtoi:'2026-09-30', vtod:'30/09/26', emision:'2025-01-24', piso_tem:2.17/100, vn_emision:100},
   TTD26: {tipo:'DUAL',       vtoi:'2026-12-15', vtod:'15/12/26', emision:'2025-01-24', piso_tem:2.14/100, vn_emision:100},
+  // Duales CER/TAMAR — CER₀ null hasta datos de licitación
+  TXMJ8: {tipo:'DUAL CER/TAMAR', vtoi:'2028-06-30', vtod:'30/06/28', emision:null, piso_tem:null, vn_emision:100, cer0:null},
+  TXMD8: {tipo:'DUAL CER/TAMAR', vtoi:'2028-12-15', vtod:'15/12/28', emision:null, piso_tem:null, vn_emision:100, cer0:null},
+  TXMJ9: {tipo:'DUAL CER/TAMAR', vtoi:'2029-06-29', vtod:'29/06/29', emision:null, piso_tem:null, vn_emision:100, cer0:null},
+  TXMD9: {tipo:'DUAL CER/TAMAR', vtoi:'2029-12-14', vtod:'14/12/29', emision:null, piso_tem:null, vn_emision:100, cer0:null},
+  TXMJ0: {tipo:'DUAL CER/TAMAR', vtoi:'2030-06-28', vtod:'28/06/30', emision:null, piso_tem:null, vn_emision:100, cer0:null},
 };
 
 const MN_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
