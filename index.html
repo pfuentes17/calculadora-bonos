@@ -960,11 +960,11 @@ const CER_INSTR=[
   // TXMJ8: emisión 15/05/2026 → T-10 = 30/04/2026 → CER 758.12
   // TXMJ9: emisión 30/04/2026 → T-10 = 16/04/2026 → CER 747.45
   // TXMD8/D9/J0: emisión 11/06/2026 → T-10 = 28/05/2026 → CER 779.24
-  {sym:'TXMJ8',tipo:'DUAL CER/TAMAR',cer0:758.12,  vto:'30/06/28',vtoi:'2028-06-30',dur:2.03,resid:100,coupon:0},
-  {sym:'TXMD8',tipo:'DUAL CER/TAMAR',cer0:779.2418,vto:'15/12/28',vtoi:'2028-12-15',dur:2.53,resid:100,coupon:0},
-  {sym:'TXMJ9',tipo:'DUAL CER/TAMAR',cer0:747.4453,vto:'29/06/29',vtoi:'2029-06-29',dur:3.03,resid:100,coupon:0},
-  {sym:'TXMD9',tipo:'DUAL CER/TAMAR',cer0:779.2418,vto:'14/12/29',vtoi:'2029-12-14',dur:3.53,resid:100,coupon:0},
-  {sym:'TXMJ0',tipo:'DUAL CER/TAMAR',cer0:779.2418,vto:'28/06/30',vtoi:'2030-06-28',dur:4.03,resid:100,coupon:0},
+  {sym:'TXMJ8',tipo:'DUAL CER/TAMAR',cer0:758.1180,  vto:'30/06/28',vtoi:'2028-06-30',dur:2.03,resid:100,coupon:0},
+  {sym:'TXMD8',tipo:'DUAL CER/TAMAR',cer0:779.2409,vto:'15/12/28',vtoi:'2028-12-15',dur:2.53,resid:100,coupon:0},
+  {sym:'TXMJ9',tipo:'DUAL CER/TAMAR',cer0:746.3809,vto:'29/06/29',vtoi:'2029-06-29',dur:3.03,resid:100,coupon:0},
+  {sym:'TXMD9',tipo:'DUAL CER/TAMAR',cer0:779.2409,vto:'14/12/29',vtoi:'2029-12-14',dur:3.53,resid:100,coupon:0},
+  {sym:'TXMJ0',tipo:'DUAL CER/TAMAR',cer0:779.2409,vto:'28/06/30',vtoi:'2030-06-28',dur:4.03,resid:100,coupon:0},
 ];
 
 // ─── HELPERS ────────────────────────────────────────────────────
@@ -1657,7 +1657,7 @@ const SIM_SCHED={
 };
 const SIM_CER0={TZX26:200.388,X31L6:685.5506,X30S6:714.9849,TZXO6:480.1526,X30N6:661.1807,TZXD6:271.0476,TZXM7:362.5767,TZX27:200.388,TZXD7:271.0476,TZX28:200.388,TX26:22.544,TX28:22.544,TX31:47.2937,DICP:1.4552,PARP:1.4552,
   // TXM CER0 pendiente — completar con datos de prospecto de licitación
-  TXMJ8:758.12,TXMD8:779.2418,TXMJ9:747.4453,TXMD9:779.2418,TXMJ0:779.2418};
+  TXMJ8:758.1180,TXMD8:779.2409,TXMJ9:746.3809,TXMD9:779.2409,TXMJ0:779.2409};
 
 let simBond=null,simIPCMonths=[],simChart=null;
 
@@ -1849,11 +1849,11 @@ const TMR_INSTR = {
   TTS26: {tipo:'DUAL',         vtod:'30/09/26', vtoi:'2026-09-30', emision:'2025-01-24', piso_tem:2.17/100, cer0:null},
   TTD26: {tipo:'DUAL',         vtod:'15/12/26', vtoi:'2026-12-15', emision:'2025-01-24', piso_tem:2.14/100, cer0:null},
   // Duales CER/TAMAR — Gestión Milei · CER₀ pendiente de datos de licitación
-  TXMJ8: {tipo:'DUAL CER/TAMAR', vtod:'30/06/28', vtoi:'2028-06-30', emision:'2026-05-15', piso_tem:null, cer0:758.12},
-  TXMD8: {tipo:'DUAL CER/TAMAR', vtod:'15/12/28', vtoi:'2028-12-15', emision:'2026-06-11', piso_tem:null, cer0:779.2418},
-  TXMJ9: {tipo:'DUAL CER/TAMAR', vtod:'29/06/29', vtoi:'2029-06-29', emision:'2026-04-30', piso_tem:null, cer0:747.4453},
-  TXMD9: {tipo:'DUAL CER/TAMAR', vtod:'14/12/29', vtoi:'2029-12-14', emision:'2026-06-11', piso_tem:null, cer0:779.2418},
-  TXMJ0: {tipo:'DUAL CER/TAMAR', vtod:'28/06/30', vtoi:'2030-06-28', emision:'2026-06-11', piso_tem:null, cer0:779.2418},
+  TXMJ8: {tipo:'DUAL CER/TAMAR', vtod:'30/06/28', vtoi:'2028-06-30', emision:'2026-05-15', piso_tem:null, cer0:758.1180},
+  TXMD8: {tipo:'DUAL CER/TAMAR', vtod:'15/12/28', vtoi:'2028-12-15', emision:'2026-06-11', piso_tem:null, cer0:779.2409},
+  TXMJ9: {tipo:'DUAL CER/TAMAR', vtod:'29/06/29', vtoi:'2029-06-29', emision:'2026-04-30', piso_tem:null, cer0:746.3809},
+  TXMD9: {tipo:'DUAL CER/TAMAR', vtod:'14/12/29', vtoi:'2029-12-14', emision:'2026-06-11', piso_tem:null, cer0:779.2409},
+  TXMJ0: {tipo:'DUAL CER/TAMAR', vtod:'28/06/30', vtoi:'2030-06-28', emision:'2026-06-11', piso_tem:null, cer0:779.2409},
 };
 
 let tmrTamarTEM = SEED_TAMAR_RATE; // TEM mensual TAMAR actual
@@ -2079,11 +2079,11 @@ const TSIM_INSTR = {
   TTS26: {tipo:'DUAL',       vtoi:'2026-09-30', vtod:'30/09/26', emision:'2025-01-24', piso_tem:2.17/100, vn_emision:100},
   TTD26: {tipo:'DUAL',       vtoi:'2026-12-15', vtod:'15/12/26', emision:'2025-01-24', piso_tem:2.14/100, vn_emision:100},
   // Duales CER/TAMAR — CER₀ null hasta datos de licitación
-  TXMJ8: {tipo:'DUAL CER/TAMAR', vtoi:'2028-06-30', vtod:'30/06/28', emision:'2026-05-15', piso_tem:null, vn_emision:100, cer0:758.12},
-  TXMD8: {tipo:'DUAL CER/TAMAR', vtoi:'2028-12-15', vtod:'15/12/28', emision:'2026-06-11', piso_tem:null, vn_emision:100, cer0:779.2418},
-  TXMJ9: {tipo:'DUAL CER/TAMAR', vtoi:'2029-06-29', vtod:'29/06/29', emision:'2026-04-30', piso_tem:null, vn_emision:100, cer0:747.4453},
-  TXMD9: {tipo:'DUAL CER/TAMAR', vtoi:'2029-12-14', vtod:'14/12/29', emision:'2026-06-11', piso_tem:null, vn_emision:100, cer0:779.2418},
-  TXMJ0: {tipo:'DUAL CER/TAMAR', vtoi:'2030-06-28', vtod:'28/06/30', emision:'2026-06-11', piso_tem:null, vn_emision:100, cer0:779.2418},
+  TXMJ8: {tipo:'DUAL CER/TAMAR', vtoi:'2028-06-30', vtod:'30/06/28', emision:'2026-05-15', piso_tem:null, vn_emision:100, cer0:758.1180},
+  TXMD8: {tipo:'DUAL CER/TAMAR', vtoi:'2028-12-15', vtod:'15/12/28', emision:'2026-06-11', piso_tem:null, vn_emision:100, cer0:779.2409},
+  TXMJ9: {tipo:'DUAL CER/TAMAR', vtoi:'2029-06-29', vtod:'29/06/29', emision:'2026-04-30', piso_tem:null, vn_emision:100, cer0:746.3809},
+  TXMD9: {tipo:'DUAL CER/TAMAR', vtoi:'2029-12-14', vtod:'14/12/29', emision:'2026-06-11', piso_tem:null, vn_emision:100, cer0:779.2409},
+  TXMJ0: {tipo:'DUAL CER/TAMAR', vtoi:'2030-06-28', vtod:'28/06/30', emision:'2026-06-11', piso_tem:null, vn_emision:100, cer0:779.2409},
 };
 
 const MN_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
