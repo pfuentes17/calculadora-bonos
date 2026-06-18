@@ -1746,10 +1746,10 @@ function cerRender(priceMap,cer){
   // Eje X = MD en años (log scale)
   const allMDs=[...zcPts.map(d=>d.md),...cpnPts.map(d=>d.md),...dualPts.map(d=>d.md)].filter(x=>x>0);
   const maxMD=allMDs.length?Math.max(1,...allMDs)+0.5:13;
-  // Curva ref en MD (años) — cerRegFn sigue en días, convertimos
+  // Curva ref en MD (años) — cerRegFn en días, paso lineal
   const refPts=[];
-  for(let lx=Math.log10(0.02);lx<=Math.log10(maxMD+0.2);lx+=0.03){
-    const xYr=Math.pow(10,lx);
+  const step=(maxMD+0.3)/120;
+  for(let xYr=0.01;xYr<=maxMD+0.3;xYr+=step){
     refPts.push({x:xYr, y:cerRegFn(xYr*365)});
   }
   const colors=zcPts.map(p=>{const d=p.tir-cerRegFn(p.dtm);return d>0.5?{bg:'rgba(16,185,129,.9)',brd:'rgba(16,185,129,1)'}:d<-0.5?{bg:'rgba(248,113,113,.9)',brd:'rgba(248,113,113,1)'}:{bg:'rgba(148,163,184,.8)',brd:'rgba(148,163,184,1)'};});
@@ -1761,7 +1761,7 @@ function cerRender(priceMap,cer){
     {label:'CPN',data:cpnPts.map(p=>({x:p.md,y:p.tir,sym:p.sym,diff:p.tir-cerRegFn(p.dtm),vt:p.vt,par:p.par,tipo:'CPN',md:p.md})),backgroundColor:'rgba(56,189,248,.8)',borderColor:'rgba(56,189,248,1)',borderWidth:1.5,pointRadius:7,pointHoverRadius:10,pointStyle:'triangle',order:2},
     {label:'Dual CER/TAMAR',data:dualPts.map(p=>({x:p.md,y:p.tir,sym:p.sym,diff:p.tir-cerRegFn(p.dtm),vt:p.vt,par:p.par,tipo:'DUAL',md:p.md})),backgroundColor:'rgba(52,211,153,.85)',borderColor:'rgba(52,211,153,1)',borderWidth:1.5,pointRadius:7,pointHoverRadius:10,pointStyle:'rectRot',order:2}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#94adc8',font:{family:'IBM Plex Mono',size:9},boxWidth:10,padding:12}},tooltip:{backgroundColor:'#111827',borderColor:'#2d4060',borderWidth:1,titleColor:'#e8f0f8',bodyColor:'#94adc8',padding:9,callbacks:{title(i){return i[0].raw.sym||'Curva';},label(i){const d=i.raw;if(!d.sym)return`TIR ref: ${i.parsed.y.toFixed(2)}%`;const s=d.diff>=0?'+':'';const tipo=d.tipo||'';return[`Tipo: ${tipo}`,`TIR real: ${i.parsed.y.toFixed(2)}%`,`Curva ref: ${cerRegFn((d.md||i.parsed.x)*365).toFixed(2)}%`,`Δ: ${s}${d.diff.toFixed(2)}% ${d.diff>0.5?'← BARATO':d.diff<-0.5?'← CARO':'← en curva'}`,`MD: ${d.md?d.md.toFixed(2)+'y':'—'}`,`Paridad: ${(d.par*100).toFixed(2)}%`];}}}},
-  scales:{x:{type:'logarithmic',min:0.02,max:maxMD+0.2,title:{display:true,text:'Macaulay Duration (años)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>{const vals=[0.1,0.25,0.5,1,2,3,5,7,10,13];const closest=vals.find(vv=>Math.abs(vv-v)<vv*0.1);return closest!==undefined?closest+'y':null;}}},y:{title:{display:true,text:'TIR real (%)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>v.toFixed(1)+'%'}}}}});
+  scales:{x:{type:'linear',min:0,max:maxMD+0.3,title:{display:true,text:'Macaulay Duration (años)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>v%1===0?v+'y':null}},y:{title:{display:true,text:'TIR real (%)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>v.toFixed(1)+'%'}}}}});
   const oD2=cerChart.draw.bind(cerChart);cerChart.draw=function(){oD2();
     [1,2,3].forEach(dsIdx=>{
       cerChart.getDatasetMeta(dsIdx).data.forEach((el,i)=>{
