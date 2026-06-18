@@ -292,7 +292,7 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
   <div class="main-grid">
     <div class="tcol">
       <div class="tw"><div class="tw-hdr" style="color:var(--or)">Cero Cupón CER (TZX / LECER) <span id="zc-cnt" style="color:var(--mu);font-weight:400"></span></div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT hoy</th><th>Paridad</th><th>Días</th><th>DUR</th><th>TIR Real</th><th class="ct">vs Curva</th><th>Δ TIR</th><th>Var%</th></tr></thead><tbody id="zc-body"></tbody></table></div></div>
-      <div class="tw"><div class="tw-hdr" style="color:var(--te)">Con Cupón CER (TX / DICP / PARP) · TIR aprox.</div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT capital</th><th>Paridad</th><th>Días</th><th>DUR</th><th>Resid.</th><th>TIR aprox.</th><th>Var%</th></tr></thead><tbody id="cpn-body"></tbody></table></div></div>
+      <div class="tw"><div class="tw-hdr" style="color:var(--te)">Con Cupón CER (TX / DICP / PARP) · TIR real por IRR</div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT capital</th><th>Paridad</th><th>Días</th><th>DUR</th><th>Resid.</th><th>TIR aprox.</th><th>Var%</th></tr></thead><tbody id="cpn-body"></tbody></table></div></div>
       <div class="tw"><div class="tw-hdr" style="color:#34d399">Duales CER/TAMAR (TXM) · escenario CER
         <span style="font-size:9px;font-weight:400;color:var(--mu);margin-left:8px">max(CER acum., TAMAR acum.) · TIR real si gana CER</span>
       </div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT si gana CER</th><th>Paridad CER</th><th>Días</th><th>DUR</th><th>TIR real CER</th><th class="ct">CER₀</th><th>Var%</th></tr></thead><tbody id="dual-cer-body"></tbody></table></div></div>
@@ -1005,13 +1005,121 @@ function computeTF(sym,price){
   return{tem:tem*100,tna:(vf/price-1)*365/dtm*100,tea:(Math.pow(1+tem,365/30)-1)*100,ret:(vf/price-1)*100,vf,dtm};
 }
 
+// ── Schedules de flujos CPN (% del VN original por cuota) ────────────────────
+// Fuente: prospectos + ecovalores.com.ar · flujos FUTUROS desde hoy (filtrado dinámico)
+const CPN_FLOWS = {
+  // TX26: 2% anual semestral; amort 10 cuotas iguales del 10% (May-Nov 2021-2025) + últimas 2
+  TX26:[
+    {d:'2026-05-09', pct:10 + 1*0.20},   // 10% amort + cupón 1% s/20% outstanding
+    {d:'2026-11-09', pct:10 + 1*0.10},   // 10% amort + cupón 1% s/10% outstanding
+  ],
+  // TX28: 2.25% anual semestral; amort 10 cuotas del 10% (May 2024 - Nov 2028)
+  TX28:[
+    {d:'2026-05-09', pct:10 + 1.125*0.60},
+    {d:'2026-11-09', pct:10 + 1.125*0.50},
+    {d:'2027-05-09', pct:10 + 1.125*0.40},
+    {d:'2027-11-09', pct:10 + 1.125*0.30},
+    {d:'2028-05-09', pct:10 + 1.125*0.20},
+    {d:'2028-11-09', pct:10 + 1.125*0.10},
+  ],
+  // TX31: 2.5% anual semestral; cupón puro Nov-26, luego 10 cuotas del 10% (May-27 a Nov-31)
+  TX31:[
+    {d:'2026-11-30', pct:0  + 1.25*1.00},
+    {d:'2027-05-30', pct:10 + 1.25*1.00},
+    {d:'2027-11-30', pct:10 + 1.25*0.90},
+    {d:'2028-05-30', pct:10 + 1.25*0.80},
+    {d:'2028-11-30', pct:10 + 1.25*0.70},
+    {d:'2029-05-30', pct:10 + 1.25*0.60},
+    {d:'2029-11-30', pct:10 + 1.25*0.50},
+    {d:'2030-05-30', pct:10 + 1.25*0.40},
+    {d:'2030-11-30', pct:10 + 1.25*0.30},
+    {d:'2031-05-30', pct:10 + 1.25*0.20},
+    {d:'2031-11-30', pct:10 + 1.25*0.10},
+  ],
+  // DICP: 5.83% anual semestral; 16 cuotas del 5% (Jun-26 a Ene-34), s/80% VN
+  DICP:[
+    {d:'2026-06-30', pct:5 + 2.915*0.80},
+    {d:'2026-12-31', pct:5 + 2.915*0.75},
+    {d:'2027-06-30', pct:5 + 2.915*0.70},
+    {d:'2027-12-31', pct:5 + 2.915*0.65},
+    {d:'2028-06-30', pct:5 + 2.915*0.60},
+    {d:'2029-01-01', pct:5 + 2.915*0.55},
+    {d:'2029-07-02', pct:5 + 2.915*0.50},
+    {d:'2029-12-31', pct:5 + 2.915*0.45},
+    {d:'2030-07-01', pct:5 + 2.915*0.40},
+    {d:'2030-12-31', pct:5 + 2.915*0.35},
+    {d:'2031-06-30', pct:5 + 2.915*0.30},
+    {d:'2031-12-31', pct:5 + 2.915*0.25},
+    {d:'2032-06-30', pct:5 + 2.915*0.20},
+    {d:'2032-12-31', pct:5 + 2.915*0.15},
+    {d:'2033-06-30', pct:5 + 2.915*0.10},
+    {d:'2034-01-02', pct:5 + 2.915*0.05},
+  ],
+  // PARP: 1.77% anual semestral; cupón puro hasta Apr-29; 20 cuotas del 5% (Oct-29 a Dic-38)
+  PARP:[
+    {d:'2026-09-30', pct:0   + 0.885*1.00},
+    {d:'2027-03-31', pct:0   + 0.885*1.00},
+    {d:'2027-09-30', pct:0   + 0.885*1.00},
+    {d:'2028-03-31', pct:0   + 0.885*1.00},
+    {d:'2028-10-02', pct:0   + 0.885*1.00},
+    {d:'2029-04-02', pct:0   + 0.885*1.00},
+    {d:'2029-10-01', pct:5   + 0.885*1.00},
+    {d:'2030-04-01', pct:5   + 0.885*0.95},
+    {d:'2030-10-01', pct:5   + 0.885*0.90},
+    {d:'2031-04-01', pct:5   + 0.885*0.85},
+    {d:'2031-10-01', pct:5   + 0.885*0.80},
+    {d:'2032-04-01', pct:5   + 0.885*0.75},
+    {d:'2032-10-01', pct:5   + 0.885*0.70},
+    {d:'2033-04-01', pct:5   + 0.885*0.65},
+    {d:'2033-10-01', pct:5   + 0.885*0.60},
+    {d:'2034-04-01', pct:5   + 0.885*0.55},
+    {d:'2034-10-01', pct:5   + 0.885*0.50},
+    {d:'2035-04-01', pct:5   + 0.885*0.45},
+    {d:'2035-10-01', pct:5   + 0.885*0.40},
+    {d:'2036-04-01', pct:5   + 0.885*0.35},
+    {d:'2036-10-01', pct:5   + 0.885*0.30},
+    {d:'2037-04-01', pct:5   + 0.885*0.25},
+    {d:'2037-10-01', pct:5   + 0.885*0.20},
+    {d:'2038-04-01', pct:5   + 0.885*0.15},
+    {d:'2038-10-01', pct:5   + 0.885*0.10},
+    {d:'2038-12-31', pct:5   + 0.885*0.05},
+  ],
+};
+
+// TIR real por bisección sobre flujos futuros (en % del VN original)
+// precio_real = precio_ARS × CER_0 / CER_hoy (regresa a unidades del VN original)
+function irrCER(futureFlows, precio_real){
+  const pv = r => futureFlows.reduce((s,f) => s + f.pct / Math.pow(1+r, f.t/365), 0);
+  let lo=-0.5, hi=5.0;
+  for(let i=0;i<100;i++){
+    const mid=(lo+hi)/2;
+    (pv(mid) > precio_real) ? lo=mid : hi=mid;
+    if(Math.abs(hi-lo)<1e-8) break;
+  }
+  return ((lo+hi)/2)*100;
+}
+
 function computeCER(instr,precio,cer){
   const dtm=getDTM(instr.vtoi)??0;
   const vt=100*(cer/instr.cer0)*(instr.resid/100);
   const par=precio/vt;
   let tir=null;
   if(instr.tipo==='ZC'&&dtm>0)tir=(Math.pow(vt/precio,365/dtm)-1)*100;
-  else if(instr.tipo==='CPN'&&dtm>0){const cy=(vt*instr.coupon)/precio,cg=(vt-precio)/(precio*(dtm/365));tir=(cy+cg)*100;}
+  else if(instr.tipo==='CPN'&&dtm>0){
+    const flows=CPN_FLOWS[instr.sym];
+    if(flows&&instr.cer0){
+      const today=new Date();today.setHours(0,0,0,0);
+      const futureFlows=flows
+        .map(f=>({t:Math.round((new Date(f.d+'T00:00:00-03:00')-today)/86400000),pct:f.pct}))
+        .filter(f=>f.t>0);
+      if(futureFlows.length>0){
+        const precio_real=precio*(instr.cer0/cer); // ARS → unidades VN original
+        tir=irrCER(futureFlows,precio_real);
+      }
+    }
+    // fallback si no hay schedule
+    if(tir===null){const cy=(vt*instr.coupon)/precio,cg=(vt-precio)/(precio*(dtm/365));tir=(cy+cg)*100;}
+  }
   return{dtm,vt,par,tir};
 }
 
@@ -1525,7 +1633,7 @@ function cerRender(priceMap,cer){
       <td>${pr(precio,0)}</td><td style="color:var(--mu)">${pr(p.bid||p.px_bid,0)}</td><td style="color:var(--mu)">${pr(p.ask||p.px_ask,0)}</td>
       <td style="color:var(--or)">${pr(c.vt,0)}</td><td style="${pCol}">${(c.par*100).toFixed(1)}%</td>
       <td style="color:var(--mu)">${c.dtm}d</td><td style="color:var(--pu)">${i.dur}</td>
-      <td>${i.resid}%</td><td style="${tCol}">${c.tir!=null?'~'+p2(c.tir):'—'}</td>
+      <td>${i.resid}%</td><td style="${tCol}">${c.tir!=null?p2(c.tir):'—'}</td>
       <td style="${pchCol}">${(pch>=0?'+':'')+pch.toFixed(2)+'%'}</td>
     </tr>`;
   }).join('');
