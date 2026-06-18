@@ -293,6 +293,9 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
     <div class="tcol">
       <div class="tw"><div class="tw-hdr" style="color:var(--or)">Cero Cupón CER (TZX / LECER) <span id="zc-cnt" style="color:var(--mu);font-weight:400"></span></div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT hoy</th><th>Paridad</th><th>Días</th><th>DUR</th><th>TIR Real</th><th class="ct">vs Curva</th><th>Δ TIR</th><th>Var%</th></tr></thead><tbody id="zc-body"></tbody></table></div></div>
       <div class="tw"><div class="tw-hdr" style="color:var(--te)">Con Cupón CER (TX / DICP / PARP) · TIR aprox.</div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT capital</th><th>Paridad</th><th>Días</th><th>DUR</th><th>Resid.</th><th>TIR aprox.</th><th>Var%</th></tr></thead><tbody id="cpn-body"></tbody></table></div></div>
+      <div class="tw"><div class="tw-hdr" style="color:#34d399">Duales CER/TAMAR (TXM) · escenario CER
+        <span style="font-size:9px;font-weight:400;color:var(--mu);margin-left:8px">max(CER acum., TAMAR acum.) · TIR real si gana CER</span>
+      </div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT si gana CER</th><th>Paridad CER</th><th>Días</th><th>DUR</th><th>TIR real CER</th><th class="ct">CER₀</th><th>Var%</th></tr></thead><tbody id="dual-cer-body"></tbody></table></div></div>
     </div>
     <div class="cpanel">
       <div><div class="ctitle" style="color:var(--or)">Curva TIR Real — Cero Cupón CER</div><div class="csub">TIR real (%) vs. días · regresión logarítmica</div><div class="cbox"><canvas id="cerChart"></canvas></div>
@@ -302,7 +305,7 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       <table class="vt"><thead><tr><th>Ticker</th><th>Días</th><th>VT</th><th>Paridad</th><th>TIR</th><th>Curva</th><th>Δ</th><th>Señal</th></tr></thead><tbody id="cer-val"></tbody></table></div>
     </div>
   </div>
-  <div class="ftr"><div style="display:flex;gap:10px;flex-wrap:wrap"><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--gr);display:inline-block"></span>Barato</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--rd);display:inline-block"></span>Caro</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--or);display:inline-block"></span>ZC (TIR real)</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--te);display:inline-block"></span>Cupón (TIR aprox.)</div></div><div class="fnote">rendimientos.co/api/cer-precios · CER: rendimientos.co/api/cer (BCRA T-10)</div></div>
+  <div class="ftr"><div style="display:flex;gap:10px;flex-wrap:wrap"><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--gr);display:inline-block"></span>Barato</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--rd);display:inline-block"></span>Caro</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--or);display:inline-block"></span>ZC (TIR real)</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--te);display:inline-block"></span>Cupón (TIR aprox.)</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block"></span>Dual CER/TAMAR · escenario CER</div></div><div class="fnote">rendimientos.co/api/cer-precios · CER: rendimientos.co/api/cer (BCRA T-10) · TXM CER₀: pendiente de datos de licitación</div></div>
 </div>
 
 <!-- ════ TAB SIM ════ -->
@@ -926,6 +929,12 @@ const SEED_CER_PRECIOS=[
   {symbol:'TX31', c:1425.0,bid:1424.5,ask:1425.0,pct:-0.62},
   {symbol:'DICP', c:51940, bid:51850, ask:51940, pct:0.27},
   {symbol:'PARP', c:33570, bid:33565, ask:33570, pct:-0.02},
+  // Duales CER/TAMAR — precios seed estimados (actualizar con datos de mercado)
+  {symbol:'TXMJ8', c:103.0,  bid:102.5,  ask:103.5,  pct:0.0},
+  {symbol:'TXMD8', c:102.0,  bid:101.5,  ask:102.5,  pct:0.0},
+  {symbol:'TXMJ9', c:104.5,  bid:104.0,  ask:105.0,  pct:0.0},
+  {symbol:'TXMD9', c:103.5,  bid:103.0,  ask:104.0,  pct:0.0},
+  {symbol:'TXMJ0', c:106.0,  bid:105.5,  ask:106.5,  pct:0.0},
 ];
 const SEED_CER_IDX={cer:771.5368,fecha:'2026-05-16'};
 window._cerIdx = SEED_CER_IDX.cer; // actualizado por cerRefresh()
@@ -1527,6 +1536,42 @@ function cerRender(priceMap,cer){
     document.getElementById('cer-k3').textContent=valid.filter(d=>d.tir-cerRegFn(d.dtm)>0.5).length+' / '+valid.length;
     document.getElementById('cer-k4').textContent=(avgPar*100).toFixed(2)+'%';
   }
+
+  // Dual CER/TAMAR rows
+  const dualCT = CER_INSTR.filter(i=>i.tipo==='DUAL CER/TAMAR');
+  document.getElementById('dual-cer-body').innerHTML=dualCT.map(i=>{
+    const p=priceMap[i.sym]; if(!p) return '';
+    const precio=p.c;
+    const pch=p.pct||0; const pchCol=pch>=0?'color:var(--gr)':'color:var(--rd)';
+    const today=new Date(); today.setHours(0,0,0,0);
+    const vtoDate=new Date(i.vtoi+'T00:00:00-03:00');
+    const dtm=Math.round((vtoDate-today)/86400000);
+    if(dtm<=0) return '';
+    // Si tenemos cer0: VT CER = 100 × (CER_hoy / CER_0)
+    let vtCer=null, tirCer=null, paridad=null;
+    if(i.cer0){
+      vtCer=100*(cer/i.cer0);
+      tirCer=(Math.pow(vtCer/precio,365/dtm)-1)*100;
+      paridad=vtCer/precio;
+    }
+    const tCol=tirCer!=null?(tirCer>0.5?'color:var(--gr)':tirCer<-0.5?'color:var(--rd)':'color:#94adc8'):'color:var(--mu)';
+    const pCol=paridad!=null?(paridad>1.005?'color:var(--rd)':paridad<0.995?'color:var(--gr)':'color:#94adc8'):'color:var(--mu)';
+    const cer0Str=i.cer0?i.cer0.toFixed(4):'<span style="color:var(--rd);font-size:9px">pendiente</span>';
+    return`<tr>
+      <td>${i.sym}<span style="font-size:8px;margin-left:4px;padding:1px 4px;border-radius:3px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#34d399">CER/TAM</span></td>
+      <td class="ct"><span class="vto">${i.vto}</span></td>
+      <td>${pr(precio)}</td>
+      <td style="color:var(--mu)">${pr(p.bid)}</td>
+      <td style="color:var(--mu)">${pr(p.ask)}</td>
+      <td style="color:var(--or)">${vtCer!=null?pr(vtCer):'<span style="color:var(--mu);font-size:9px">—&nbsp;(CER₀ pendiente)</span>'}</td>
+      <td style="${pCol}">${paridad!=null?(paridad*100).toFixed(2)+'%':'—'}</td>
+      <td style="color:var(--mu)">${dtm}d</td>
+      <td style="color:var(--pu)">${i.dur}</td>
+      <td style="${tCol};font-weight:600">${tirCer!=null?p2(tirCer):'<span style="color:var(--mu);font-size:9px">—&nbsp;(CER₀ pendiente)</span>'}</td>
+      <td class="ct" style="font-size:9px;color:var(--mu)">${cer0Str}</td>
+      <td style="${pchCol}">${(pch>=0?'+':'')+pch.toFixed(2)+'%'}</td>
+    </tr>`;
+  }).join('');
 
   // Val table
   document.getElementById('cer-val').innerHTML=zcCalc.filter(d=>d.dtm>0&&d.tir!=null).sort((a,b)=>a.dtm-b.dtm).map(d=>{
