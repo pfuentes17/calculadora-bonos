@@ -298,7 +298,7 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       </div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT si gana CER</th><th>Paridad CER</th><th>Días</th><th>DUR</th><th>TIR real CER</th><th class="ct">CER₀</th><th>Var%</th></tr></thead><tbody id="dual-cer-body"></tbody></table></div></div>
     </div>
     <div class="cpanel">
-      <div><div class="ctitle" style="color:var(--or)">Curva TIR Real — CER</div><div class="csub">ZC · CPN · Dual CER/TAMAR · TIR real (%) vs. días · regresión logarítmica sobre ZC</div><div class="cbox"><canvas id="cerChart"></canvas></div>
+      <div><div class="ctitle" style="color:var(--or)">Curva TIR Real — CER</div><div class="csub">ZC · CPN · Dual CER/TAMAR · TIR real vs. días al vto. (eje log) · regresión sobre ZC</div><div class="cbox"><canvas id="cerChart"></canvas></div>
       <div class="cleg"><div class="cli"><div class="cld" style="background:var(--gr)"></div>Barato</div><div class="cli"><div class="cld" style="background:var(--rd)"></div>Caro</div><div class="cli"><div class="cld" style="background:#94a3b8"></div>En curva</div><div class="cli"><div class="cldash" style="border-color:rgba(251,146,60,.5)"></div>Curva ref.</div></div></div>
       <hr class="dv">
       <div><div class="ctitle" style="color:var(--te)">Análisis vs Curva CER · Δ positivo = barato</div>
@@ -918,14 +918,14 @@ const SEED_CER_PRECIOS=[
   {symbol:'X31L6',c:113.8, bid:113.7, ask:113.8, pct:0.26},
   {symbol:'X30S6',c:109.0, bid:109.0, ask:109.05,pct:0.04},
   {symbol:'TZXO6',c:161.55,bid:161.45,ask:161.55,pct:0.03},
-  {symbol:'TX26', c:694.0, bid:694.0, ask:694.1, pct:0.04},
+  {symbol:'TX26', c:350.0, bid:349.5, ask:350.5, pct:0.0},   // post pago may-26: resid 10%
   {symbol:'X30N6',c:117.295,bid:117.15,ask:117.3,pct:0.03},
   {symbol:'TZXD6',c:284.55,bid:284.4, ask:284.55,pct:0.01},
   {symbol:'TZXM7',c:209.9, bid:209.85,ask:209.9, pct:-0.09},
   {symbol:'TZX27',c:373.8, bid:373.8, ask:373.95,pct:0.04},
   {symbol:'TZXD7',c:261.1, bid:261.0, ask:261.2, pct:0.23},
   {symbol:'TZX28',c:332.4, bid:332.3, ask:332.7, pct:0.28},
-  {symbol:'TX28', c:1638.5,bid:1634.5,ask:1638.5,pct:0.27},
+  {symbol:'TX28', c:1370.0,bid:1368.0,ask:1372.0,pct:0.0},   // post pago may-26: resid 50%
   {symbol:'TX31', c:1425.0,bid:1424.5,ask:1425.0,pct:-0.62},
   {symbol:'DICP', c:51940, bid:51850, ask:51940, pct:0.27},
   {symbol:'PARP', c:33570, bid:33565, ask:33570, pct:-0.02},
@@ -950,8 +950,8 @@ const CER_INSTR=[
   {sym:'TZX27',tipo:'ZC', cer0:200.388,  vto:'30/06/27',vtoi:'2027-06-30',dur:1.09, resid:100,coupon:0},
   {sym:'TZXD7',tipo:'ZC', cer0:271.0476, vto:'15/12/27',vtoi:'2027-12-15',dur:1.55, resid:100,coupon:0},
   {sym:'TZX28',tipo:'ZC', cer0:200.388,  vto:'30/06/28',vtoi:'2028-06-30',dur:2.09, resid:100,coupon:0},
-  {sym:'TX26', tipo:'CPN',cer0:22.544,   vto:'09/11/26',vtoi:'2026-11-09',dur:0.45, resid:20, coupon:0.020},
-  {sym:'TX28', tipo:'CPN',cer0:22.544,   vto:'09/11/28',vtoi:'2028-11-09',dur:2.45, resid:60, coupon:0.0225},
+  {sym:'TX26', tipo:'CPN',cer0:22.544,   vto:'09/11/26',vtoi:'2026-11-09',dur:0.12, resid:10, coupon:0.020},
+  {sym:'TX28', tipo:'CPN',cer0:22.544,   vto:'09/11/28',vtoi:'2028-11-09',dur:2.37, resid:50, coupon:0.0225},
   {sym:'TX31', tipo:'CPN',cer0:47.2937,  vto:'30/11/31',vtoi:'2031-11-30',dur:5.51, resid:100,coupon:0.025},
   {sym:'DICP', tipo:'CPN',cer0:1.4552,   vto:'31/12/33',vtoi:'2033-12-31',dur:7.60, resid:80, coupon:0.0583},
   {sym:'PARP', tipo:'CPN',cer0:1.4552,   vto:'31/12/38',vtoi:'2038-12-31',dur:12.59,resid:100,coupon:0.0177},
@@ -1010,12 +1010,12 @@ function computeTF(sym,price){
 const CPN_FLOWS = {
   // TX26: 2% anual semestral; amort 10 cuotas iguales del 10% (May-Nov 2021-2025) + últimas 2
   TX26:[
-    {d:'2026-05-09', pct:10 + 1*0.20},   // 10% amort + cupón 1% s/20% outstanding
+    // may-26 ya fue pagado; resid actual = 10% del VN original
     {d:'2026-11-09', pct:10 + 1*0.10},   // 10% amort + cupón 1% s/10% outstanding
   ],
   // TX28: 2.25% anual semestral; amort 10 cuotas del 10% (May 2024 - Nov 2028)
   TX28:[
-    {d:'2026-05-09', pct:10 + 1.125*0.60},
+    // may-26 ya fue pagado; resid actual = 50% del VN original
     {d:'2026-11-09', pct:10 + 1.125*0.50},
     {d:'2027-05-09', pct:10 + 1.125*0.40},
     {d:'2027-11-09', pct:10 + 1.125*0.30},
@@ -1585,6 +1585,10 @@ async function tfRefresh(){
 let cerChart=null,cerRegFn=x=>0,cerOf=SEED_CER_IDX.cer,cerPriceMap={};
 
 function cerRender(priceMap,cer){
+  // Suplementar priceMap con seed TXM si la API CER no los incluye
+  SEED_CER_PRECIOS.filter(d=>d.symbol.startsWith('TXM')).forEach(d=>{
+    if(!priceMap[d.symbol]) priceMap[d.symbol]={c:d.c,bid:d.bid,ask:d.ask,pct:d.pct};
+  });
   cerPriceMap=priceMap;cerOf=cer;
   document.getElementById('cer-of').textContent=cer.toFixed(4);
   document.getElementById('cer-k5').textContent=cer.toFixed(2);
@@ -1716,8 +1720,13 @@ function cerRender(priceMap,cer){
     return {sym:i.sym,dtm,tir:tirCer,vt:vtCer,par,tipo:'DUAL'};
   }).filter(Boolean);
 
-  const maxDtm=Math.max(820, ...dualPts.map(d=>d.dtm+20));
-  const refPts=[];for(let x=20;x<=maxDtm;x+=5){const y=cerRegFn(x);refPts.push({x,y});}
+  const allDtms=[...zcPts,...cpnPts,...dualPts].map(d=>d.dtm).filter(d=>d>0);
+  const maxDtm=allDtms.length?Math.max(820,...allDtms.map(d=>d+50)):820;
+  const refPts=[];
+  // Puntos log-distribuidos para suavizar la curva en escala log
+  for(let lx=Math.log10(15);lx<=Math.log10(maxDtm);lx+=0.03){
+    const x=Math.round(Math.pow(10,lx)); refPts.push({x,y:cerRegFn(x)});
+  }
   const colors=zcPts.map(p=>{const d=p.tir-cerRegFn(p.dtm);return d>0.5?{bg:'rgba(16,185,129,.9)',brd:'rgba(16,185,129,1)'}:d<-0.5?{bg:'rgba(248,113,113,.9)',brd:'rgba(248,113,113,1)'}:{bg:'rgba(148,163,184,.8)',brd:'rgba(148,163,184,1)'};});
   if(cerChart)cerChart.destroy();
   const ctx=document.getElementById('cerChart').getContext('2d');
@@ -1727,7 +1736,7 @@ function cerRender(priceMap,cer){
     {label:'CPN',data:cpnPts.map(p=>({x:p.dtm,y:p.tir,sym:p.sym,diff:p.tir-cerRegFn(p.dtm),vt:p.vt,par:p.par,tipo:'CPN'})),backgroundColor:'rgba(56,189,248,.8)',borderColor:'rgba(56,189,248,1)',borderWidth:1.5,pointRadius:7,pointHoverRadius:10,pointStyle:'triangle',order:2},
     {label:'Dual CER/TAMAR',data:dualPts.map(p=>({x:p.dtm,y:p.tir,sym:p.sym,diff:p.tir-cerRegFn(p.dtm),vt:p.vt,par:p.par,tipo:'DUAL'})),backgroundColor:'rgba(52,211,153,.85)',borderColor:'rgba(52,211,153,1)',borderWidth:1.5,pointRadius:7,pointHoverRadius:10,pointStyle:'rectRot',order:2}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#94adc8',font:{family:'IBM Plex Mono',size:9},boxWidth:10,padding:12}},tooltip:{backgroundColor:'#111827',borderColor:'#2d4060',borderWidth:1,titleColor:'#e8f0f8',bodyColor:'#94adc8',padding:9,callbacks:{title(i){return i[0].raw.sym||'Curva';},label(i){const d=i.raw;if(!d.sym)return`TIR ref: ${i.parsed.y.toFixed(2)}%`;const s=d.diff>=0?'+':'';const tipo=d.tipo||'';return[`Tipo: ${tipo}`,`TIR real: ${i.parsed.y.toFixed(2)}%`,`Curva ref: ${cerRegFn(i.parsed.x).toFixed(2)}%`,`Δ: ${s}${d.diff.toFixed(2)}% ${d.diff>0.5?'← BARATO':d.diff<-0.5?'← CARO':'← en curva'}`,`Paridad: ${(d.par*100).toFixed(2)}%`];}}}},
-  scales:{x:{type:'linear',min:0,max:maxDtm,title:{display:true,text:'Días al vencimiento',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10}}},y:{title:{display:true,text:'TIR real (%)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>v.toFixed(1)+'%'}}}}});
+  scales:{x:{type:'logarithmic',min:10,max:maxDtm,title:{display:true,text:'Días al vencimiento (log)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>{const vals=[30,100,200,500,1000,2000,5000];return vals.includes(v)?v+'d':null;}}},y:{title:{display:true,text:'TIR real (%)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>v.toFixed(1)+'%'}}}}});
   const oD2=cerChart.draw.bind(cerChart);cerChart.draw=function(){oD2();
     [1,2,3].forEach(dsIdx=>{
       cerChart.getDatasetMeta(dsIdx).data.forEach((el,i)=>{
