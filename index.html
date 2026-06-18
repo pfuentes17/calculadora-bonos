@@ -298,14 +298,14 @@ hr.dv{border:none;border-top:1px solid var(--bdr);}
       </div><div class="tbl-wrap"><table><thead><tr><th>Ticker</th><th class="ct">Vto.</th><th>Precio</th><th>Bid</th><th>Ask</th><th>VT si gana CER</th><th>Paridad CER</th><th>Días</th><th>DUR</th><th>TIR real CER</th><th class="ct">CER₀</th><th>Var%</th></tr></thead><tbody id="dual-cer-body"></tbody></table></div></div>
     </div>
     <div class="cpanel">
-      <div><div class="ctitle" style="color:var(--or)">Curva TIR Real — Cero Cupón CER</div><div class="csub">TIR real (%) vs. días · regresión logarítmica</div><div class="cbox"><canvas id="cerChart"></canvas></div>
+      <div><div class="ctitle" style="color:var(--or)">Curva TIR Real — CER</div><div class="csub">ZC · CPN · Dual CER/TAMAR · TIR real (%) vs. días · regresión logarítmica sobre ZC</div><div class="cbox"><canvas id="cerChart"></canvas></div>
       <div class="cleg"><div class="cli"><div class="cld" style="background:var(--gr)"></div>Barato</div><div class="cli"><div class="cld" style="background:var(--rd)"></div>Caro</div><div class="cli"><div class="cld" style="background:#94a3b8"></div>En curva</div><div class="cli"><div class="cldash" style="border-color:rgba(251,146,60,.5)"></div>Curva ref.</div></div></div>
       <hr class="dv">
       <div><div class="ctitle" style="color:var(--te)">Análisis vs Curva CER · Δ positivo = barato</div>
       <table class="vt"><thead><tr><th>Ticker</th><th>Días</th><th>VT</th><th>Paridad</th><th>TIR</th><th>Curva</th><th>Δ</th><th>Señal</th></tr></thead><tbody id="cer-val"></tbody></table></div>
     </div>
   </div>
-  <div class="ftr"><div style="display:flex;gap:10px;flex-wrap:wrap"><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--gr);display:inline-block"></span>Barato</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--rd);display:inline-block"></span>Caro</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--or);display:inline-block"></span>ZC (TIR real)</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--te);display:inline-block"></span>Cupón (TIR aprox.)</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block"></span>Dual CER/TAMAR · escenario CER</div></div><div class="fnote">rendimientos.co/api/cer-precios · CER: rendimientos.co/api/cer (BCRA T-10) · TXM CER₀: pendiente de datos de licitación</div></div>
+  <div class="ftr"><div style="display:flex;gap:10px;flex-wrap:wrap"><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--gr);display:inline-block"></span>Barato</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--rd);display:inline-block"></span>Caro</div><div class="fl"><span style="width:7px;height:7px;border-radius:50%;background:var(--or);display:inline-block"></span>ZC · círculo (en curva=gris, barato=verde, caro=rojo)</div><div class="fl"><span style="width:7px;height:7px;border-radius:2px;background:#38bdf8;display:inline-block;transform:rotate(0deg)"></span>CPN · triángulo</div><div class="fl"><span style="width:7px;height:7px;background:#34d399;display:inline-block;transform:rotate(45deg)"></span>Dual CER/TAMAR · rombo</div></div><div class="fnote">rendimientos.co/api/cer-precios · CER: rendimientos.co/api/cer (BCRA T-10) · TXM CER₀: pendiente de datos de licitación</div></div>
 </div>
 
 <!-- ════ TAB SIM ════ -->
@@ -1586,18 +1586,54 @@ function cerRender(priceMap,cer){
     return`<tr><td>${d.sym}</td><td style="color:var(--mu)">${d.dtm}d</td><td style="color:var(--or)">${pr(d.vt)}</td><td style="${pCol}">${(d.par*100).toFixed(1)}%</td><td style="${tCol};font-weight:600">${p2(d.tir)}</td><td style="color:var(--mu)">${ref.toFixed(2)}%</td><td style="${dCol}">${(diff>=0?'+':'')+diff.toFixed(2)+'%'}</td><td>${badge(diff,0.5)}</td></tr>`;
   }).join('');
 
-  // CER Chart
+  // CER Chart — ZC + CPN + Dual CER/TAMAR
   const zcPts=valid.filter(d=>d.dtm>0);
-  const refPts=[];for(let x=20;x<=820;x+=5){const y=cerRegFn(x);refPts.push({x,y});}
+  // CPN points
+  const cpnPts=cpn.map(i=>{
+    const p=priceMap[i.sym]; if(!p) return null;
+    const precio=p.c||p.precio; const c=computeCER(i,precio,cer);
+    if(!c.tir||!c.dtm||c.dtm<=0) return null;
+    return {sym:i.sym,dtm:c.dtm,tir:c.tir,vt:c.vt,par:c.par,tipo:'CPN'};
+  }).filter(Boolean);
+  // Dual CER/TAMAR points
+  const dualPts=dualCT.map(i=>{
+    const p=priceMap[i.sym]; if(!p||!i.cer0) return null;
+    const precio=p.c; const vtCer=100*(cer/i.cer0);
+    const today=new Date(); today.setHours(0,0,0,0);
+    const vtoDate=new Date(i.vtoi+'T00:00:00-03:00');
+    const dtm=Math.round((vtoDate-today)/86400000);
+    if(dtm<=0) return null;
+    const tirCer=(Math.pow(vtCer/precio,365/dtm)-1)*100;
+    const par=vtCer/precio;
+    return {sym:i.sym,dtm,tir:tirCer,vt:vtCer,par,tipo:'DUAL'};
+  }).filter(Boolean);
+
+  const maxDtm=Math.max(820, ...dualPts.map(d=>d.dtm+20));
+  const refPts=[];for(let x=20;x<=maxDtm;x+=5){const y=cerRegFn(x);refPts.push({x,y});}
   const colors=zcPts.map(p=>{const d=p.tir-cerRegFn(p.dtm);return d>0.5?{bg:'rgba(16,185,129,.9)',brd:'rgba(16,185,129,1)'}:d<-0.5?{bg:'rgba(248,113,113,.9)',brd:'rgba(248,113,113,1)'}:{bg:'rgba(148,163,184,.8)',brd:'rgba(148,163,184,1)'};});
   if(cerChart)cerChart.destroy();
   const ctx=document.getElementById('cerChart').getContext('2d');
   cerChart=new Chart(ctx,{type:'scatter',data:{datasets:[
     {label:'Curva',data:refPts,type:'line',borderColor:'rgba(251,146,60,.45)',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:.3,fill:false,order:10},
-    {label:'ZC',data:zcPts.map((p,i)=>({x:p.dtm,y:p.tir,sym:p.sym,diff:p.tir-cerRegFn(p.dtm),vt:p.vt,par:p.par})),backgroundColor:colors.map(c=>c.bg),borderColor:colors.map(c=>c.brd),borderWidth:1.5,pointRadius:7,pointHoverRadius:10,order:1}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#111827',borderColor:'#2d4060',borderWidth:1,titleColor:'#e8f0f8',bodyColor:'#94adc8',padding:9,callbacks:{title(i){return i[0].raw.sym||'Curva';},label(i){const d=i.raw;if(!d.sym)return`TIR ref: ${i.parsed.y.toFixed(2)}%`;const s=d.diff>=0?'+':'';return[`TIR real: ${i.parsed.y.toFixed(2)}%`,`Curva: ${cerRegFn(i.parsed.x).toFixed(2)}%`,`Δ: ${s}${d.diff.toFixed(2)}% ${d.diff>0.5?'← BARATO':d.diff<-0.5?'← CARO':'← en curva'}`,`Paridad: ${(d.par*100).toFixed(2)}%`];}}}},
-  scales:{x:{type:'linear',min:0,max:820,title:{display:true,text:'Días al vencimiento',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10}}},y:{title:{display:true,text:'TIR real (%)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>v.toFixed(1)+'%'}}}}});
-  const oD2=cerChart.draw.bind(cerChart);cerChart.draw=function(){oD2();const c=cerChart.ctx;cerChart.getDatasetMeta(1).data.forEach((el,i)=>{const p=cerChart.data.datasets[1].data[i];if(!p.sym)return;const{x,y}=el.getCenterPoint?el.getCenterPoint():el;c.save();c.font='600 9px IBM Plex Mono,monospace';c.fillStyle='#c9d8e8';c.textAlign='center';c.fillText(p.sym,x,y-12);c.restore();});};
+    {label:'ZC',data:zcPts.map(p=>({x:p.dtm,y:p.tir,sym:p.sym,diff:p.tir-cerRegFn(p.dtm),vt:p.vt,par:p.par,tipo:'ZC'})),backgroundColor:colors.map(c=>c.bg),borderColor:colors.map(c=>c.brd),borderWidth:1.5,pointRadius:7,pointHoverRadius:10,order:1},
+    {label:'CPN',data:cpnPts.map(p=>({x:p.dtm,y:p.tir,sym:p.sym,diff:p.tir-cerRegFn(p.dtm),vt:p.vt,par:p.par,tipo:'CPN'})),backgroundColor:'rgba(56,189,248,.8)',borderColor:'rgba(56,189,248,1)',borderWidth:1.5,pointRadius:7,pointHoverRadius:10,pointStyle:'triangle',order:2},
+    {label:'Dual CER/TAMAR',data:dualPts.map(p=>({x:p.dtm,y:p.tir,sym:p.sym,diff:p.tir-cerRegFn(p.dtm),vt:p.vt,par:p.par,tipo:'DUAL'})),backgroundColor:'rgba(52,211,153,.85)',borderColor:'rgba(52,211,153,1)',borderWidth:1.5,pointRadius:7,pointHoverRadius:10,pointStyle:'rectRot',order:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#94adc8',font:{family:'IBM Plex Mono',size:9},boxWidth:10,padding:12}},tooltip:{backgroundColor:'#111827',borderColor:'#2d4060',borderWidth:1,titleColor:'#e8f0f8',bodyColor:'#94adc8',padding:9,callbacks:{title(i){return i[0].raw.sym||'Curva';},label(i){const d=i.raw;if(!d.sym)return`TIR ref: ${i.parsed.y.toFixed(2)}%`;const s=d.diff>=0?'+':'';const tipo=d.tipo||'';return[`Tipo: ${tipo}`,`TIR real: ${i.parsed.y.toFixed(2)}%`,`Curva ref: ${cerRegFn(i.parsed.x).toFixed(2)}%`,`Δ: ${s}${d.diff.toFixed(2)}% ${d.diff>0.5?'← BARATO':d.diff<-0.5?'← CARO':'← en curva'}`,`Paridad: ${(d.par*100).toFixed(2)}%`];}}}},
+  scales:{x:{type:'linear',min:0,max:maxDtm,title:{display:true,text:'Días al vencimiento',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10}}},y:{title:{display:true,text:'TIR real (%)',color:'#4a6080',font:{family:'IBM Plex Mono',size:10}},grid:{color:'rgba(31,45,64,.5)'},ticks:{color:'#4a6080',font:{family:'IBM Plex Mono',size:10},callback:v=>v.toFixed(1)+'%'}}}}});
+  const oD2=cerChart.draw.bind(cerChart);cerChart.draw=function(){oD2();
+    [1,2,3].forEach(dsIdx=>{
+      cerChart.getDatasetMeta(dsIdx).data.forEach((el,i)=>{
+        const p=cerChart.data.datasets[dsIdx].data[i]; if(!p||!p.sym)return;
+        const{x,y}=el.getCenterPoint?el.getCenterPoint():el;
+        cerChart.ctx.save();
+        cerChart.ctx.font='600 9px IBM Plex Mono,monospace';
+        cerChart.ctx.fillStyle=dsIdx===3?'#34d399':dsIdx===2?'#7dd3fc':'#c9d8e8';
+        cerChart.ctx.textAlign='center';
+        cerChart.ctx.fillText(p.sym,x,y-12);
+        cerChart.ctx.restore();
+      });
+    });
+  };
 
   // Sim sync
   document.getElementById('sim-cer-chip').textContent=cer.toFixed(4);
